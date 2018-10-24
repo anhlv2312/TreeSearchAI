@@ -1,0 +1,22 @@
+package botmate;
+
+import problem.ProblemSpec;
+
+import java.io.IOException;
+
+public class Solver {
+    public static void main(String[] args) {
+
+        ProblemSpec ps;
+        try {
+            ps = new ProblemSpec("examples/level_1/input1.txt");
+            System.out.println(ps.toString());
+        } catch (IOException e) {
+            System.out.println("IO Exception occurred");
+            System.exit(1);
+        }
+        System.out.println("Finished loading!");
+
+    }
+    
+}
