@@ -12,7 +12,7 @@ public class Level {
     private int levelNumber;
     /** List of terrain types present in level **/
     private List<Terrain> terrainTypes;
-    /** List of actions possible in level **/
+    /** List of action types possible in level **/
     private List<ActionType> availableActions;
 
     /**
@@ -43,6 +43,10 @@ public class Level {
 
     public List<ActionType> getAvailableActions() {
         return availableActions;
+    }
+
+    public boolean isValidActionForLevel(ActionType a) {
+        return availableActions.contains(a);
     }
 
     private void loadLevel(int levelNumber) {
