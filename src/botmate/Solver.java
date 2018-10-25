@@ -26,13 +26,13 @@ public class Solver {
 
         // Generate the initial state
         initialState = State.getStartState(ps.getFirstCarType(), ps.getFirstDriver(), ps.getFirstTireModel());
-        System.out.println(initialState + ": " + toString(initialState));
+        System.out.print(initialState);
 
         // Insert the initial state into the graph
         Vertex<State> initialVertex = states.insertVertex(initialState);
 
         // Initialize a sample action
-        Action firstAction = new Action(ActionType.CHANGE_CAR, "toyota");
+        Action firstAction = new Action(ActionType.MOVE);
 
         // Simulate the action and get the next state
         nextState = sim.step(firstAction);
@@ -43,9 +43,8 @@ public class Solver {
         // Insert the edge (of action) from initial to next state,
         // the edge could be Action or an object of action and probability
         states.insertEdge(initialVertex, nextVertex, firstAction);
-        System.out.println(nextState + ": " +  toString(nextState));
+        System.out.print(nextState);
 
-        System.out.println(states);
 
     }
 
