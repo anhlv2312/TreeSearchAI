@@ -2,10 +2,8 @@ package botmate;
 
 import problem.*;
 import simulator.*;
-
 import java.io.IOException;
-import java.util.TreeMap;
-import java.util.TreeSet;
+
 
 
 public class Solver {
@@ -21,20 +19,8 @@ public class Solver {
     }
 
     private static void solve(ProblemSpec ps, Simulator sim) {
-        // initialize a Tree (true: directed)
-        TreeMap<State, Integer> states = new TreeMap<>();
-        State initialState, nextState;
-
-        // Generate the initial state
-        initialState = State.getStartState(ps.getFirstCarType(), ps.getFirstDriver(), ps.getFirstTireModel());
-        System.out.print(initialState);
-
-
-        states.put(initialState, 0);
-        Action firstAction = new Action(ActionType.MOVE);
-        nextState = sim.step(firstAction);
-        System.out.print(nextState);
-
+        Agent agent = new Agent(ps, sim);
+        agent.search();
     }
 
     private static String toString(State state) {
