@@ -4,53 +4,91 @@ import problem.*;
 import simulator.Simulator;
 import simulator.State;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 public class Agent {
+    private static final double EXP_CONST = Math.sqrt(2.0);
+    private Random random = new Random();
     private ProblemSpec ps;
-    private Simulator sim;
+    private Simulator simulator;
     private Node rootNode;
-    private Node currentNode;
-    private List<State> solution;
+    private State currentState;
+    static double epsilon = 1e-6;
 
-    public Agent(ProblemSpec ps, Simulator sim) {
+    public Agent(ProblemSpec ps) {
         this.ps = ps;
-        this.sim = sim;
-        State initialState = State.getStartState(ps.getFirstCarType(), ps.getFirstDriver(), ps.getFirstTireModel());
-        solution = new LinkedList<>();
-        solution.add(initialState);
-        rootNode = new Node(initialState);
-        currentNode = rootNode;
+        this.simulator = new Simulator(ps);
+        rootNode = new Node(null);
+        currentState = State.getStartState(ps.getFirstCarType(), ps.getFirstDriver(), ps.getFirstTireModel());
     }
 
-    public List<State> search() {
-        List<State> solution = new LinkedList<>();
+    public Node getRootNode() {
+        return rootNode;
+    }
 
-        for (Action action : generateActions()) {
-            System.out.println(action.getActionType() + " " + action.getCarType());
+    public void runSimulation() {
+        simulator.reset();
+        List<Node> visited = new LinkedList<>();
+        Node current = this.rootNode;
+        visited.add(current);
+        while (current.children != null) {
+            current = select(current);
+            visited.add(current);
+            currentState = simulator.step(current.action);
         }
-
-        return solution;
+        expand(current);
+        Node newNode = select(current);
+        visited.add(newNode);
+        double value = rollOut(newNode);
+        for (Node node : visited) {
+            updateStats(node, value);
+        }
     }
 
-    private List<Node> expandNode() {
-        List<State> states = new ArrayList<>();
-        List<Node> nodes = new ArrayList<>();
-
-        return nodes;
+    private void expand(Node node) {
+//        System.out.println("Expanding " + node);
+        node.children = new LinkedList<>();
+        for (Action action: generateActions()) {
+            node.children.add(new Node(action));
+        }
     }
 
-    private Action selectAction() {
-        return generateActions().get(0);
+    public Node select(Node node) {
+        Node selected = null;
+        double bestValue = Double.NEGATIVE_INFINITY;
+        for (Node child : node.children) {
+            double UCT = child.value + EXP_CONST * Math.sqrt(Math.log(node.visitCount+1)/(child.visitCount+epsilon));
+            if (UCT > bestValue) {
+                selected = child;
+                bestValue = UCT;
+            }
+        }
+        return selected;
+    }
+
+
+    public double rollOut(Node node) {
+        List<Action> actions = generateActions();
+        Action action = actions.get(random.nextInt(actions.size()));
+        simulator.step(action);
+        State nextState = simulator.step(new Action(ActionType.MOVE));
+        if (nextState == null) {
+            return -10;
+        } else {
+            return nextState.getPos() - currentState.getPos();
+        }
+    }
+
+    public void updateStats(Node node, double value) {
+        node.visitCount++;
+        node.value += value;
+//        System.out.println("Updating " + node + " " + node.value + "/" + node.visitCount);
     }
 
     private List<Action> generateActions() {
 
         //TODO: prune the invalid actions for example,
         //TODO: if the fuel tank is full, no need to add fuel, can't change to the same driver or tire
-
 
         List<Action> actions = new ArrayList<>();
 
@@ -105,10 +143,6 @@ public class Agent {
         }
 
         return actions;
-    }
-
-    private boolean isFinish(State currentState) {
-        return sim.isGoalState(currentState);
     }
 
 }
