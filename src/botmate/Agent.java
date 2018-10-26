@@ -48,7 +48,7 @@ public class Agent {
     private void expand(Node node) {
 //        System.out.println("Expanding " + node);
         node.children = new LinkedList<>();
-        for (Action action: generateActions()) {
+        for (Action action: generateActions(currentState)) {
             node.children.add(new Node(action));
         }
     }
@@ -68,14 +68,15 @@ public class Agent {
 
 
     public double rollOut(Node node) {
-        List<Action> actions = generateActions();
+        State tempState = currentState;
+        List<Action> actions = generateActions(tempState);
         Action action = actions.get(random.nextInt(actions.size()));
         simulator.step(action);
         State nextState = simulator.step(new Action(ActionType.MOVE));
         if (nextState == null) {
             return -10;
         } else {
-            return nextState.getPos() - currentState.getPos();
+            return nextState.getPos() - tempState.getPos();
         }
     }
 
@@ -85,7 +86,7 @@ public class Agent {
 //        System.out.println("Updating " + node + " " + node.value + "/" + node.visitCount);
     }
 
-    private List<Action> generateActions() {
+    private List<Action> generateActions(State state) {
 
         //TODO: prune the invalid actions for example,
         //TODO: if the fuel tank is full, no need to add fuel, can't change to the same driver or tire
@@ -96,22 +97,30 @@ public class Agent {
 
         if (ps.getLevel().isValidActionForLevel(ActionType.CHANGE_CAR)) {
             for (String car : ps.getCarOrder()) {
-                actions.add(new Action(ActionType.CHANGE_CAR, car));
+                if (state!=null && !car.equals(state.getCarType())) {
+                    actions.add(new Action(ActionType.CHANGE_CAR, car));
+                }
             }
         }
 
         if (ps.getLevel().isValidActionForLevel(ActionType.CHANGE_DRIVER)) {
             for (String driver : ps.getDriverOrder()) {
-                actions.add(new Action(ActionType.CHANGE_DRIVER, driver));
+                if (state!=null && !driver.equals(state.getDriver())) {
+                    actions.add(new Action(ActionType.CHANGE_DRIVER, driver));
+                }
             }
         }
 
         if (ps.getLevel().isValidActionForLevel(ActionType.CHANGE_TIRES)) {
             for (Tire tire : ps.getTireOrder()) {
-                actions.add(new Action(ActionType.CHANGE_TIRES, tire));
+                if (state!=null && !tire.equals(state.getTireModel())) {
+                    actions.add(new Action(ActionType.CHANGE_TIRES, tire));
+                }
             }
         }
 
+
+        // TODO: Review this
         if (ps.getLevel().isValidActionForLevel(ActionType.ADD_FUEL)) {
             for (int i = 1; i < 5; i++) {
                 actions.add(new Action(ActionType.ADD_FUEL, i * 10));
