@@ -1,11 +1,12 @@
 package botmate;
 
-import botmate.adts.*;
 import problem.*;
 import simulator.*;
 
 
 import java.io.IOException;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 public class Solver {
     public static void main(String[] args) {
@@ -20,31 +21,21 @@ public class Solver {
     }
 
     private static void solve(ProblemSpec ps, Simulator sim) {
-        // initialize a graph (true: directed)
-        Graph<State, Action> states = new AdjacencyMapGraph<>(true);
+        // initialize a Tree (true: directed)
+        TreeSet<Node> states = new TreeMap<>();
         State initialState, nextState;
 
         // Generate the initial state
         initialState = State.getStartState(ps.getFirstCarType(), ps.getFirstDriver(), ps.getFirstTireModel());
         System.out.print(initialState);
 
-        // Insert the initial state into the graph
-        Vertex<State> initialVertex = states.insertVertex(initialState);
 
-        // Initialize a sample action
+        states.put(initialState, null);
         Action firstAction = new Action(ActionType.MOVE);
-
-        // Simulate the action and get the next state
         nextState = sim.step(firstAction);
-
-        // Insert the next state into the graph
-        Vertex<State> nextVertex = states.insertVertex(nextState);
-
-        // Insert the edge (of action) from initial to next state,
-        // the edge could be Action or an object of action and probability
-        states.insertEdge(initialVertex, nextVertex, firstAction);
         System.out.print(nextState);
 
+        states.put(nextState, firstAction);
 
     }
 
