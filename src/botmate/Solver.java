@@ -20,7 +20,7 @@ public class Solver {
             System.out.println("Error while loading input/output file: " + exception.toString());
             System.exit(1);
         }
-        solveProblem();
+        solveProblemLearning();
     }
 
     private static void solveProblemLearning() {
