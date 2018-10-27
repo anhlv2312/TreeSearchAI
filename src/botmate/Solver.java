@@ -9,37 +9,26 @@ public class Solver {
     private final static int SAMPLE_COUNT = 1000;
 
     private static ProblemSpec ps;
-    private static Simulator simulator;
-    private static Agent agent;
-    private static State initialState;
-
+    private static Simulator sim;
 
     public static void main(String[] args) {
         try {
-            ps = new ProblemSpec(args[1]);
-            simulator = new Simulator(ps, args[2]);
-            solve(ps);
-        } catch (IOException e) {
+            ps = new ProblemSpec(args[0]);
+            sim = new Simulator(ps, args[1]);
+        } catch (Exception e) {
             System.out.println("IO Exception occurred");
             System.exit(1);
-        } catch (ArrayIndexOutOfBoundsException e) {
-            System.out.println("Missing input/output file");
-            System.exit(1);
         }
-
-        initialState = State.getStartState(ps.getFirstCarType(), ps.getFirstDriver(), ps.getFirstTireModel());
-
-        agent = new Agent(ps);
-
+        solveProblem();
     }
 
-    private static void solve(ProblemSpec ps) {
-
-        State currentState = initialState;
+    private static void solveProblem() {
+        Agent agent = new Agent(ps);
+        State state = State.getStartState(ps.getFirstCarType(), ps.getFirstDriver(), ps.getFirstTireModel());
         while (true) {
-            Action action= agent.selectAction(currentState, SAMPLE_COUNT);
-            currentState = simulator.step(action);
-            if (simulator.isGoalState(currentState) || currentState == null) {
+            Action action= agent.selectAction(state, SAMPLE_COUNT);
+            state = sim.step(action);
+            if (sim.isGoalState(state) || state == null) {
                 break;
             }
         }
