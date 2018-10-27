@@ -7,7 +7,7 @@ import java.io.IOException;
 
 public class Solver {
 
-    private final static int SAMPLE_COUNT = 1000;
+
 
     private static ProblemSpec ps;
     private static Simulator sim;
@@ -23,11 +23,30 @@ public class Solver {
         solveProblem();
     }
 
+    private static void solveProblemLearning() {
+        LearningAgent agent = new LearningAgent(ps);
+        State state = sim.reset();
+        while (true) {
+            System.out.println(ps.getEnvironmentMap()[state.getPos()]);
+            for (Action action : agent.getActions(state)) {
+                sim.step(action);
+            }
+            state = sim.step(new Action(ActionType.MOVE));
+            if (sim.isGoalState(state) || state == null) {
+                break;
+            }
+            if (state.getFuel() < 10) {
+                sim.step(new Action(ActionType.ADD_FUEL, 40));
+            }
+        }
+
+    }
+
     private static void solveProblem() {
         Agent agent = new Agent(ps);
         State state = sim.reset();
         while (true) {
-            Action action= agent.selectAction(state, SAMPLE_COUNT);
+            Action action = agent.selectAction(state);
             state = sim.step(action);
             if (sim.isGoalState(state) || state == null) {
                 break;
