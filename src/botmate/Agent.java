@@ -22,6 +22,7 @@ public class Agent {
     private static final double EPSILON = 1e-6;
     private Random random = new Random();
     private ProblemSpec ps;
+    private ActionSimulator sim;
     private List<Node> nodes;
     private int visitCount;
 
@@ -38,8 +39,7 @@ public class Agent {
         int count = 0;
         while (count < numberOfSample){
             Node node = this.getBestNode();
-            double value = runSimulation(node, currentState);
-            updateStats(node, value);
+            runSimulation(node, currentState);
             count++;
         }
         return this.getBestNode().action;
@@ -63,16 +63,25 @@ public class Agent {
         return actions.get(random.nextInt(actions.size()));
     }
 
-    private double runSimulation(Node node, State state) {
-        Action action = getRandomAction(state);
-        // TODO: add simulation here by random action
-        return random.nextInt(10);
+    private void runSimulation(Node node, State state) {
+        int depth = 5;
+        this.sim = new ActionSimulator(ps);
+        this.sim.setCurrentState(state);
+        State currentState = state;
+        sim.step(node.action);
+        double totalValue = 0.0;
+
+        for (int i = 0; i <= depth; i ++) {
+            int previousPos = currentState.getPos();
+            sim.step(new Action(ActionType.MOVE));
+            currentState = sim.step(getRandomAction(currentState));
+            totalValue += (currentState.getPos() - previousPos) * Math.pow(0.95,depth);
+        }
+        node.value = (node.value * node.visitCount + totalValue) / (node.visitCount + 1);
+        node.visitCount++;
     }
 
-    private void updateStats(Node node, double value) {
-        node.visitCount++;
-        node.value += value;
-    }
+
 
     private List<Action> generateActions(State state) {
 
@@ -91,13 +100,13 @@ public class Agent {
             }
         }
 
-        if (ps.getLevel().isValidActionForLevel(ActionType.CHANGE_DRIVER)) {
-            for (String driver : ps.getDriverOrder()) {
-                if (state!=null && !driver.equals(state.getDriver())) {
-                    actions.add(new Action(ActionType.CHANGE_DRIVER, driver));
-                }
-            }
-        }
+//        if (ps.getLevel().isValidActionForLevel(ActionType.CHANGE_DRIVER)) {
+//            for (String driver : ps.getDriverOrder()) {
+//                if (state!=null && !driver.equals(state.getDriver())) {
+//                    actions.add(new Action(ActionType.CHANGE_DRIVER, driver));
+//                }
+//            }
+//        }
 
         if (ps.getLevel().isValidActionForLevel(ActionType.CHANGE_TIRES)) {
             for (Tire tire : ps.getTireOrder()) {
@@ -107,10 +116,9 @@ public class Agent {
             }
         }
 
-
         // TODO: Review this to prune as much as possible
         if (ps.getLevel().isValidActionForLevel(ActionType.ADD_FUEL)) {
-            for (int i = 1; i < 5; i++) {
+            for (int i = 1; i < (50 - state.getFuel())/10; i++) {
                 actions.add(new Action(ActionType.ADD_FUEL, i * 10));
             }
         }
@@ -121,23 +129,23 @@ public class Agent {
             actions.add(new Action(ActionType.CHANGE_PRESSURE, TirePressure.FIFTY_PERCENT));
         }
 
-        if (ps.getLevel().isValidActionForLevel(ActionType.CHANGE_CAR_AND_DRIVER)) {
-            for (String car : ps.getCarOrder()) {
-                for (String driver : ps.getDriverOrder()) {
-                    actions.add(new Action(ActionType.CHANGE_CAR_AND_DRIVER, car, driver));
-                }
-            }
-        }
-
-        if (ps.getLevel().isValidActionForLevel(ActionType.CHANGE_TIRE_FUEL_PRESSURE)) {
-            for (Tire tire : ps.getTireOrder()) {
-                for (int i = 1; i < 5; i++) {
-                    actions.add(new Action(ActionType.CHANGE_TIRE_FUEL_PRESSURE, tire, i * 10, TirePressure.ONE_HUNDRED_PERCENT));
-                    actions.add(new Action(ActionType.CHANGE_TIRE_FUEL_PRESSURE, tire, i * 10, TirePressure.SEVENTY_FIVE_PERCENT));
-                    actions.add(new Action(ActionType.CHANGE_TIRE_FUEL_PRESSURE, tire, i * 10, TirePressure.FIFTY_PERCENT));
-                }
-            }
-        }
+//        if (ps.getLevel().isValidActionForLevel(ActionType.CHANGE_CAR_AND_DRIVER)) {
+//            for (String car : ps.getCarOrder()) {
+//                for (String driver : ps.getDriverOrder()) {
+//                    actions.add(new Action(ActionType.CHANGE_CAR_AND_DRIVER, car, driver));
+//                }
+//            }
+//        }
+//
+//        if (ps.getLevel().isValidActionForLevel(ActionType.CHANGE_TIRE_FUEL_PRESSURE)) {
+//            for (Tire tire : ps.getTireOrder()) {
+//                for (int i = 1; i < 5; i++) {
+//                    actions.add(new Action(ActionType.CHANGE_TIRE_FUEL_PRESSURE, tire, i * 10, TirePressure.ONE_HUNDRED_PERCENT));
+//                    actions.add(new Action(ActionType.CHANGE_TIRE_FUEL_PRESSURE, tire, i * 10, TirePressure.SEVENTY_FIVE_PERCENT));
+//                    actions.add(new Action(ActionType.CHANGE_TIRE_FUEL_PRESSURE, tire, i * 10, TirePressure.FIFTY_PERCENT));
+//                }
+//            }
+//        }
 
         return actions;
     }

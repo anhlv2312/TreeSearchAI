@@ -25,7 +25,7 @@ public class Solver {
 
     private static void solveProblem() {
         Agent agent = new Agent(ps);
-        State state = State.getStartState(ps.getFirstCarType(), ps.getFirstDriver(), ps.getFirstTireModel());
+        State state = sim.reset();
         while (true) {
             Action action= agent.selectAction(state, SAMPLE_COUNT);
             state = sim.step(action);
