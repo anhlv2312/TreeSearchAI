@@ -17,39 +17,18 @@ public class Solver {
 
     private static void solve(ProblemSpec ps) {
 
-        Simulator simulator = new Simulator(ps);
+        Simulator simulator = new Simulator(ps, "botmate.output1.txt");
         Agent agent = new Agent(ps);
-
-        int count = 0;
-        while (count<10000) {
-            agent.runSimulation();
-            count++;
-        }
-        Node current = agent.getRootNode();
-        State currentState;
-        int step = 0;
-        while (current.children != null) {
-            step++;
-            current = agent.select(current);
-            currentState = simulator.step(current.action);
-            System.out.print("Step " + step + ": \t" + current.action.getActionType() + " - " + currentState);
+        State currentState = State.getStartState(ps.getFirstCarType(), ps.getFirstDriver(), ps.getFirstTireModel());
+        while (!simulator.isGoalState(currentState)) {
+            Action action= agent.selectAction(currentState, 1000);
+            currentState = simulator.step(action);
+            if (currentState == null) {
+                break;
+            }
         }
 
-    }
 
-    private static String toString(State state) {
-        String output = "";
-        output += ("(");
-        output += (state.getPos() + ",");
-        output += (state.isInSlipCondition()?1:0 + ",");
-        output += (state.isInBreakdownCondition()?1:0 + ",");
-        output += (state.getCarType() + ",");
-        output += (state.getDriver() + ",");
-        output += (state.getTireModel() + ",");
-        output += (state.getFuel() + ",");
-        output += (state.getTirePressure());
-        output += (")");
-        return output;
-    }
 
+    }
 }

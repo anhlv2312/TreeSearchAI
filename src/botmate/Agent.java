@@ -1,89 +1,77 @@
 package botmate;
 
 import problem.*;
-import simulator.Simulator;
 import simulator.State;
 
 import java.util.*;
 
 public class Agent {
+
+    class Node {
+        Action action;
+        double value;
+        int visitCount;
+        Node(Action action) {
+            this.action = action;
+            this.value = 0;
+            this.visitCount = 0;
+        }
+    }
+
     private static final double EXP_CONST = Math.sqrt(2.0);
+    private static final double EPSILON = 1e-6;
     private Random random = new Random();
     private ProblemSpec ps;
-    private Simulator simulator;
-    private Node rootNode;
-    private State currentState;
-    static double epsilon = 1e-6;
+    private List<Node> nodes;
+    private int visitCount;
 
-    public Agent(ProblemSpec ps) {
+    Agent(ProblemSpec ps) {
         this.ps = ps;
-        this.simulator = new Simulator(ps);
-        rootNode = new Node(null);
-        currentState = State.getStartState(ps.getFirstCarType(), ps.getFirstDriver(), ps.getFirstTireModel());
     }
 
-    public Node getRootNode() {
-        return rootNode;
-    }
-
-    public void runSimulation() {
-        simulator.reset();
-        List<Node> visited = new LinkedList<>();
-        Node current = this.rootNode;
-        visited.add(current);
-        while (current.children != null) {
-            current = select(current);
-            visited.add(current);
-            currentState = simulator.step(current.action);
-        }
-        expand(current);
-        Node newNode = select(current);
-        visited.add(newNode);
-        double value = rollOut(newNode);
-        for (Node node : visited) {
-            updateStats(node, value);
-        }
-    }
-
-    private void expand(Node node) {
-//        System.out.println("Expanding " + node);
-        node.children = new LinkedList<>();
+    public Action selectAction(State currentState, int numberOfSample) {
+        visitCount = 0;
+        nodes = new ArrayList<>();
         for (Action action: generateActions(currentState)) {
-            node.children.add(new Node(action));
+            nodes.add(new Node(action));
         }
+        int count = 0;
+        while (count < numberOfSample){
+            Node node = this.getBestNode();
+            double value = runSimulation(node, currentState);
+            updateStats(node, value);
+            count++;
+        }
+        return this.getBestNode().action;
     }
 
-    public Node select(Node node) {
+    private Node getBestNode() {
         Node selected = null;
         double bestValue = Double.NEGATIVE_INFINITY;
-        for (Node child : node.children) {
-            double UCT = child.value + EXP_CONST * Math.sqrt(Math.log(node.visitCount+1)/(child.visitCount+epsilon));
+        for (Node node : nodes) {
+            double UCT = node.value + EXP_CONST * Math.sqrt(Math.log(visitCount+1)/(node.visitCount+ EPSILON));
             if (UCT > bestValue) {
-                selected = child;
+                selected = node;
                 bestValue = UCT;
             }
         }
         return selected;
     }
 
-
-    public double rollOut(Node node) {
-        State tempState = currentState;
-        List<Action> actions = generateActions(tempState);
-        Action action = actions.get(random.nextInt(actions.size()));
-        simulator.step(action);
-        State nextState = simulator.step(new Action(ActionType.MOVE));
-        if (nextState == null) {
-            return -10;
-        } else {
-            return nextState.getPos() - tempState.getPos();
-        }
+    private Action getRandomAction(State state) {
+        List<Action> actions = generateActions(state);
+        return actions.get(random.nextInt(actions.size()));
     }
 
-    public void updateStats(Node node, double value) {
+    private double runSimulation(Node node, State state) {
+        Action action = getRandomAction(state);
+        // TODO: add simulation here by random action
+        return random.nextInt(10);
+    }
+
+    private void updateStats(Node node, double value) {
         node.visitCount++;
         node.value += value;
-//        System.out.println("Updating " + node + " " + node.value + "/" + node.visitCount);
     }
 
     private List<Action> generateActions(State state) {
@@ -120,7 +108,7 @@ public class Agent {
         }
 
 
-        // TODO: Review this
+        // TODO: Review this to prune as much as possible
         if (ps.getLevel().isValidActionForLevel(ActionType.ADD_FUEL)) {
             for (int i = 1; i < 5; i++) {
                 actions.add(new Action(ActionType.ADD_FUEL, i * 10));
@@ -155,3 +143,4 @@ public class Agent {
     }
 
 }
+
