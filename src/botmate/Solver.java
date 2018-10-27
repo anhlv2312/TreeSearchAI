@@ -2,6 +2,7 @@ package botmate;
 
 import problem.*;
 import simulator.*;
+
 import java.io.IOException;
 
 public class Solver {
@@ -15,8 +16,8 @@ public class Solver {
         try {
             ps = new ProblemSpec(args[0]);
             sim = new Simulator(ps, args[1]);
-        } catch (Exception e) {
-            System.out.println("IO Exception occurred");
+        } catch (IOException | ArrayIndexOutOfBoundsException exception) {
+            System.out.println("Error while loading input/output file: " + exception.toString());
             System.exit(1);
         }
         solveProblem();
