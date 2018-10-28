@@ -573,18 +573,26 @@ public class ProblemSpec {
 
     /**
      * Return the index of a given move from [-4, 5] U {slip, breakdown} in the
-     * list of move probabilities. (i.e. -4 = 0, -3 = 1, ..., slip = 10,
-     * breakdown = 11)
+     * list of move probabilities. (i.e. -4 = 0, -3 = 1, ..., ProblemSpec.SLIP = 10,
+     * ProblemSpec.BREAKDOWN = 11)
      *
-     * @param move the move
-     * @return the index
+     * @param move the move from (-4 to 7, where 6 = slip, 7 = breakdown)
+     * @return the index (from 0 to 11)
      */
     public int getIndexOfMove(int move) {
-        return move + 4;
+        return move + (-CAR_MIN_MOVE);
     }
 
+    /**
+     * Return the move distance from [-4, 5] U {slip, breakdown} given an index in the
+     * list of probabilities. i.e. index 0 = -4, 1 = -3, 10 = ProblemSpec.SLIP,
+     * 11 = ProblemSpec.BREAKDOWN
+     *
+     * @param index the index (from 0 to 11)
+     * @return the move from (-4 to 7, where 6 = slip, 7 = breakdown)
+     */
     public int convertIndexIntoMove(int index) {
-        return index - 4;
+        return index - (-CAR_MIN_MOVE);
     }
 
 

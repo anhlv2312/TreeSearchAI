@@ -227,6 +227,8 @@ public class State {
         State nextState = copyState();
         nextState.carType = newCarType;
         nextState.driver = newDriver;
+        nextState.fuel = ProblemSpec.FUEL_MAX;
+        nextState.tirePressure = TirePressure.ONE_HUNDRED_PERCENT;
         return nextState;
     }
 
