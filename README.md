@@ -63,3 +63,11 @@ a terminal state is reached the simulator will output the results of the run to 
 *26/10*: We have provided some example inputs and generated output for each level so you have an idea of the input format and 
 can at least test your implementations are functionin correctly. We definitely encourage you to edit the examples to come up with
 your own input cases to test on. 
+
+### Change log
+
+*28/10*: Fixed incorrect format on line-16 for input_lvl1.txt (there were too many fuel cost values). Does not affect implementation or tests since the extra values were ignored. 
+
+*27/10*: Fixed bug with A7 in state class, where fuel and tyre pressure were not being reset with car change
+
+*26/10*: Updated simulator so that it takes care of output
