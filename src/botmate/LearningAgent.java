@@ -7,7 +7,7 @@ import java.util.*;
 
 public class LearningAgent {
 
-    private final static int SAMPLE_COUNT = 100000;
+    private final static int SAMPLE_COUNT = 1000000;
 
     class Condition {
         private String car;
