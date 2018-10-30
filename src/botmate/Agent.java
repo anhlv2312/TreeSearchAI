@@ -73,7 +73,7 @@ public class Agent {
 
     private double rollOut() {
         double value = 0;
-
+        // TODO: change to iterate to the maximum of the number of remaining step
         for (int i = 0; i <= SIMULATION_DEPTH; i ++) {
             State previousState = sim.getCurrentState();
             List<Action> actions = generateActions(previousState);
@@ -82,9 +82,6 @@ public class Agent {
                 value += 2 * ps.getN() * Math.pow(GAMMA, i);
             } else {
                 value += currentState.getPos() * Math.pow(GAMMA, i);
-            }
-            if (sim.getSteps() > ps.getMaxT()) {
-                return value;
             }
         }
         return value;
@@ -149,13 +146,13 @@ public class Agent {
 
         }
 
-//        if (ps.getLevel().isValidActionForLevel(ActionType.CHANGE_CAR_AND_DRIVER)) {
-//            for (String car : ps.getCarOrder()) {
-//                for (String driver : ps.getDriverOrder()) {
-//                    actions.add(new Action(ActionType.CHANGE_CAR_AND_DRIVER, car, driver));
-//                }
-//            }
-//        }
+        if (ps.getLevel().isValidActionForLevel(ActionType.CHANGE_CAR_AND_DRIVER)) {
+            for (String car : ps.getCarOrder()) {
+                for (String driver : ps.getDriverOrder()) {
+                    actions.add(new Action(ActionType.CHANGE_CAR_AND_DRIVER, car, driver));
+                }
+            }
+        }
 //
 //        if (ps.getLevel().isValidActionForLevel(ActionType.CHANGE_TIRE_FUEL_PRESSURE)) {
 //            for (Tire tire : ps.getTireOrder()) {
