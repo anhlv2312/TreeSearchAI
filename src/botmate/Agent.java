@@ -7,88 +7,73 @@ import java.util.*;
 
 public class Agent {
 
-    private static final double EXP_CONST = 1;
-    private static final double EPSILON = 1e-6;
-    private static final double GAMMA = 0.95;
-    private final static int SAMPLE_COUNT = 10000;
-    private Random random = new Random();
+    public static final double EXPLORATION_CONST = Math.sqrt(2);
+    public static final double GAMMA = 0.95;
+    public static final int TIMEOUT = 1000;
+    public static final int SIMULATION_DEPTH = 30;
     private ProblemSpec ps;
     private MCTSSimulator sim;
-    private List<StateNode> nodes;
     private State rootState;
-    private StateNode rootNode;
-    private int visitCount;
+    private ActionNode rootNode;
 
     Agent(ProblemSpec ps) {
         this.ps = ps;
     }
 
     public Action selectBestAction(State currentState) {
+        long startTime = System.currentTimeMillis();
+
         rootState = currentState;
-        visitCount = 0;
-        rootNode = new StateNode(null);
-        expand(rootNode, rootState);
-        while (true) {
+        rootNode = new ActionNode(null);
+        this.sim = new MCTSSimulator(ps, rootState);
 
+        while (System.currentTimeMillis() - startTime < TIMEOUT) {
+            ActionNode promisingNode = selectPromisingNode(rootNode);
+            promisingNode.expand(generateActions(sim.getCurrentState()));
+            ActionNode nodeToExpand = promisingNode.getRandomChild();
+            sim.step(nodeToExpand.getAction());
+
+            nodeToExpand.setValue(rollOut());
+            backPropagation(nodeToExpand);
         }
+        return rootNode.selectBestNode().getAction();
 
-
-        nodes = new ArrayList<>();
-
-        while (visitCount < SAMPLE_COUNT){
-            StateNode node = this.getBestNode();
-            runSimulation(node, currentState);
-            visitCount++;
-        }
-        return this.getBestNode().getAction();
     }
 
-
-    private void expand(StateNode currentNode, State currentState) {
-        for (Action action: generateActions(currentState)) {
-            nodes.add(new StateNode(action));
+    private ActionNode selectPromisingNode(ActionNode rootNode) {
+        sim.reset();
+        ActionNode currentNode = rootNode;
+        while (!currentNode.isLeafNode()) {
+            currentNode = currentNode.selectBestNode();
+            sim.step(currentNode.getAction());
         }
+        return currentNode;
     }
 
-    private StateNode getBestNode() {
-        StateNode selected = null;
-        double bestValue = -Double.MAX_VALUE;
-        for (StateNode node : nodes) {
-            double UCT = node.getValue() + EXP_CONST * Math.sqrt(Math.log(visitCount+1)/(node.getVisitCount()+ EPSILON));
-            if (UCT > bestValue) {
-                selected = node;
-                bestValue = UCT;
+    private void backPropagation(ActionNode leafNode) {
+        ActionNode currentNode = leafNode;
+        while (currentNode != null) {
+            currentNode.increaseVisitCount();
+            double q = currentNode.getValue();
+            ActionNode parentNode = currentNode.getParent();
+            if (parentNode!=null) {
+                parentNode.setValue((parentNode.getValue() * parentNode.getVisitCount() + q) / (parentNode.getVisitCount() + 1));
             }
+            currentNode = parentNode;
         }
-        return selected;
     }
 
-    private Action selectRandomAction(State state) {
-        List<Action> actions = generateActions(state);
-        return actions.get(random.nextInt(actions.size()));
-    }
-
-    private void runSimulation(StateNode node, State state) {
-        int depth = 30;
-        this.sim = new MCTSSimulator(ps);
-        this.sim.setCurrentState(state);
-        State currentState = state;
-        State nextState = sim.step(node.getAction());
-        node.updateValue(nextState.getPos() - state.getPos());
-        double totalValue = 0.0;
-
-        for (int i = 0; i <= depth; i ++) {
-            int previousPos = currentState.getPos();
-            currentState = sim.step(selectRandomAction(currentState));
-            totalValue += (currentState.getPos() - previousPos) * Math.pow(GAMMA, depth);
+    private double rollOut() {
+        double value = 0;
+        for (int i = 0; i <= SIMULATION_DEPTH; i ++) {
+            int previousPos = sim.getCurrentState().getPos();
+            State currentState = sim.step(new Action(ActionType.MOVE));
+            value += (currentState.getPos() - previousPos) * Math.pow(GAMMA, i);
         }
-        node.updateValue((node.getValue() * node.getVisitCount() + totalValue) / (node.getVisitCount() + 1));
-        node.increaseVisitCount();
+        return value;
     }
 
-
-
-    private List<Action> generateActions(State state) {
+    private List<Action> generateActions(State currentState) {
 
         //TODO: prune the invalid actions for example,
         //TODO: if the fuel tank is full, no need to add fuel, can't change to the same driver or tire
@@ -99,7 +84,7 @@ public class Agent {
 
         if (ps.getLevel().isValidActionForLevel(ActionType.CHANGE_CAR)) {
             for (String car : ps.getCarOrder()) {
-                if (state!=null && !car.equals(state.getCarType())) {
+                if (currentState != null && !car.equals(currentState.getCarType())) {
                     actions.add(new Action(ActionType.CHANGE_CAR, car));
                 }
             }
@@ -107,7 +92,7 @@ public class Agent {
 
         if (ps.getLevel().isValidActionForLevel(ActionType.CHANGE_DRIVER)) {
             for (String driver : ps.getDriverOrder()) {
-                if (state!=null && !driver.equals(state.getDriver())) {
+                if (currentState != null && !driver.equals(currentState.getDriver())) {
                     actions.add(new Action(ActionType.CHANGE_DRIVER, driver));
                 }
             }
@@ -115,7 +100,7 @@ public class Agent {
 
         if (ps.getLevel().isValidActionForLevel(ActionType.CHANGE_TIRES)) {
             for (Tire tire : ps.getTireOrder()) {
-                if (state!=null && !tire.equals(state.getTireModel())) {
+                if (currentState != null && !tire.equals(currentState.getTireModel())) {
                     actions.add(new Action(ActionType.CHANGE_TIRES, tire));
                 }
             }
@@ -123,9 +108,9 @@ public class Agent {
 
         // TODO: Review this to prune as much as possible
         if (ps.getLevel().isValidActionForLevel(ActionType.ADD_FUEL)) {
-            if (state!=null && state.getFuel() < 10) {
+            if (currentState != null && currentState.getFuel() < 10) {
                 actions = new ArrayList<>();
-                for (int i = 1; i < (50 - state.getFuel()) / 10; i++) {
+                for (int i = 1; i < (50 - currentState.getFuel()) / 10; i++) {
                     actions.add(new Action(ActionType.ADD_FUEL, i * 10));
                 }
             }
@@ -140,7 +125,7 @@ public class Agent {
             tirePressures.add(TirePressure.FIFTY_PERCENT);
 
             for (TirePressure tirePressure : tirePressures) {
-                if (state!=null && !tirePressure.equals(state.getTirePressure())) {
+                if (currentState != null && !tirePressure.equals(currentState.getTirePressure())) {
                     actions.add(new Action(ActionType.CHANGE_PRESSURE, tirePressure));
                 }
             }
@@ -191,7 +176,7 @@ public class Agent {
 //        return currentNode.value;
 //    }
 
-    private int getReward(State state) {
+    private int calculateValue(State state) {
         if (sim.isGoalState(state)) {
             return 2 * ps.getN();
         } else {

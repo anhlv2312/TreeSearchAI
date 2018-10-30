@@ -6,24 +6,23 @@ import simulator.State;
 public class MCTSSimulator {
 
     private ProblemSpec ps;
+    private State rootState;
     private State currentState;
     private int steps;
 
-    public MCTSSimulator(ProblemSpec ps) {
+    public MCTSSimulator(ProblemSpec ps, State rootState) {
         this.ps = ps;
-        reset();
+        this.currentState = rootState;
+        this.rootState = rootState;
     }
 
-    public void setCurrentState(State state) {
-        this.currentState = state;
-    }
-
-
-    private State reset() {
+    public void reset() {
+        this.currentState = rootState;
         steps = 0;
-        currentState = State.getStartState(ps.getFirstCarType(),
-                ps.getFirstDriver(), ps.getFirstTireModel());
-        return currentState.copyState();
+    }
+
+    public State getCurrentState() {
+        return currentState;
     }
 
     public State step(Action a) throws IllegalArgumentException {
