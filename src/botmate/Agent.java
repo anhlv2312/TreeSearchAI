@@ -7,17 +7,19 @@ import java.util.*;
 
 public class Agent {
 
-    public static final double EXPLORATION_CONST = Math.sqrt(2);
-    public static final double GAMMA = 0.95;
+    public static final double EXPLORATION_CONST = 100; // Math.sqrt(2);
+    public static final double GAMMA = 0.9;
     public static final int TIMEOUT = 1000;
     public static final int SIMULATION_DEPTH = 30;
     private ProblemSpec ps;
     private MCTSSimulator sim;
     private State rootState;
     private ActionNode rootNode;
+    private Random random;
 
     Agent(ProblemSpec ps) {
         this.ps = ps;
+        this.random = new Random();
     }
 
     public Action selectBestAction(State currentState) {
@@ -26,6 +28,7 @@ public class Agent {
         rootState = currentState;
         rootNode = new ActionNode(null);
         this.sim = new MCTSSimulator(ps, rootState);
+
 
         while (System.currentTimeMillis() - startTime < TIMEOUT) {
             ActionNode promisingNode = selectPromisingNode(rootNode);
@@ -36,6 +39,11 @@ public class Agent {
             nodeToExpand.setValue(rollOut());
             backPropagation(nodeToExpand);
         }
+
+        for (ActionNode node : rootNode.getChildren()) {
+            System.out.println(node.getAction().getActionType() + " " + node.getVisitCount() + " " + node.getValue());
+        }
+
         return rootNode.selectBestNode().getAction();
 
     }
@@ -65,10 +73,13 @@ public class Agent {
 
     private double rollOut() {
         double value = 0;
+
         for (int i = 0; i <= SIMULATION_DEPTH; i ++) {
-            int previousPos = sim.getCurrentState().getPos();
-            State currentState = sim.step(new Action(ActionType.MOVE));
-            value += (currentState.getPos() - previousPos) * Math.pow(GAMMA, i);
+            State previousState = sim.getCurrentState();
+            List<Action> actions = generateActions(previousState);
+            State currentState = sim.step(actions.get(random.nextInt(actions.size())));
+
+            value += currentState.getPos() * Math.pow(GAMMA, i);
         }
         return value;
     }
@@ -151,37 +162,6 @@ public class Agent {
 //        }
 
         return actions;
-    }
-
-//    private  double backTracking(StateNode node, int depth){
-//        double totalValue = 0.0;
-//        StateNode currentNode = node ;
-//
-//        try {
-//            while (depth >= 0) {
-//                currentNode = currentNode.parent;
-//                if (currentNode.children != null) {
-//                    totalValue += currentNode.child.value + (getReward(currentNode.state) * Math.pow(GAMMA, depth));
-//                } else {
-//                    totalValue += (getReward(currentNode.state) * Math.pow(GAMMA, depth));
-//                }
-//                currentNode.value = (currentNode.value * currentNode.visitCount + totalValue) / (currentNode.visitCount + 1);
-//
-//                depth--;
-//            }
-//        }catch (Exception ex){
-//            System.out.println(ex.toString());
-//        }
-//
-//        return currentNode.value;
-//    }
-
-    private int calculateValue(State state) {
-        if (sim.isGoalState(state)) {
-            return 2 * ps.getN();
-        } else {
-            return state.getPos();
-        }
     }
 
 }

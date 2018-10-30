@@ -33,6 +33,10 @@ public class ActionNode {
         return children.get(random.nextInt(children.size()));
     }
 
+    public List<ActionNode> getChildren() {
+        return children;
+    }
+
     public double getValue() {
         return value;
     }
