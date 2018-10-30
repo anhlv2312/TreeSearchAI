@@ -1,32 +1,33 @@
 package botmate;
 
 import problem.*;
-import simulator.Simulator;
 import simulator.State;
 
-/**
- * This class is the simulator for the problem.
- * The simulator takes in an action and returns the next state.
- */
-public class ActionSimulator extends Simulator {
+public class MCTSSimulator {
 
     private ProblemSpec ps;
     private State currentState;
     private int steps;
 
-    public ActionSimulator(ProblemSpec ps) {
-        super(ps, null);
+    public MCTSSimulator(ProblemSpec ps) {
         this.ps = ps;
+        reset();
     }
 
     public void setCurrentState(State state) {
         this.currentState = state;
     }
 
+
+    private State reset() {
+        steps = 0;
+        currentState = State.getStartState(ps.getFirstCarType(),
+                ps.getFirstDriver(), ps.getFirstTireModel());
+        return currentState.copyState();
+    }
+
     public State step(Action a) throws IllegalArgumentException {
-
         State nextState;
-
         if (!actionValidForLevel(a)) {
             throw new IllegalArgumentException("ActionType A"
                     + a.getActionType().getActionNo()
@@ -78,21 +79,10 @@ public class ActionSimulator extends Simulator {
         return nextState;
     }
 
-    /**
-     * Checks if given action is valid for the current problem level
-     *
-     * @param a the action being performed
-     * @return True if action is value, False otherwise
-     */
     private boolean actionValidForLevel(Action a) {
         return ps.getLevel().isValidActionForLevel(a.getActionType());
     }
 
-    /**
-     * Perform CONTINUE_MOVING action
-     *
-     * @return the next state
-     */
     private State performA1() {
 
         State nextState;
@@ -124,15 +114,6 @@ public class ActionSimulator extends Simulator {
         return nextState;
     }
 
-    /**
-     * Return the move distance by sampling from conditional probability
-     * distribution.
-     *
-     * N.B. this formula is not at all optimized for performance, so be wary if
-     * trying to use it for finding a policy
-     *
-     * @return the move distance in range [-4, 5] or SLIP or BREAKDOWN
-     */
     public int sampleMoveDistance() {
 
         double[] moveProbs = getMoveProbs();
@@ -150,13 +131,6 @@ public class ActionSimulator extends Simulator {
         return move;
     }
 
-    /**
-     * Calculate the conditional move probabilities for the current state.
-     *
-     *          P(K | C, D, Ti, Te, Pressure)
-     *
-     * @return list of move probabilities
-     */
     private double[] getMoveProbs() {
 
         // get parameters of current state
@@ -208,15 +182,6 @@ public class ActionSimulator extends Simulator {
         return kProbs;
     }
 
-    /**
-     * Convert the probability of slipping on a given terrain with 50% tire
-     * pressure into a probability list, of move distance versus current
-     * terrain and tire pressure.
-     *
-     * @param slipProb probability of slipping on current terrain and 50%
-     *                 tire pressure
-     * @return list of move probabilities given current terrain and pressure
-     */
     private double[] convertSlipProbs(double slipProb) {
 
         // Adjust slip probability based on tire pressure
@@ -247,14 +212,6 @@ public class ActionSimulator extends Simulator {
         return kProbs;
     }
 
-    /**
-     * Apply bayes rule to all values in cond probs list.
-     *
-     * @param condProb list of P(B|A)
-     * @param priorA prior probability of parameter A
-     * @param priorB prior probability of parameter B
-     * @return list of P(A|B)
-     */
     private double[] bayesRule(double[] condProb, double priorA, double priorB) {
 
         double[] swappedProb = new double[condProb.length];
@@ -265,27 +222,11 @@ public class ActionSimulator extends Simulator {
         return swappedProb;
     }
 
-    /**
-     * Conditional probability formula from assignment 2 sheet
-     *
-     * @param pA P(A | E)
-     * @param pB P(B | E)
-     * @param pC P(C | E)
-     * @param pD P(D | E)
-     * @param priorE P(E)
-     * @return numerator of the P(E | A, B, C, D) formula (still need to divide
-     *      by sum over E)
-     */
     private double magicFormula(double pA, double pB, double pC, double pD,
                                double priorE) {
         return pA * pB * pC * pD * priorE;
     }
 
-    /**
-     * Get the fuel consumption of moving given the current state
-     *
-     * @return move fuel consumption for current state
-     */
     private int getFuelConsumption() {
 
         // get parameters of current state
@@ -306,12 +247,6 @@ public class ActionSimulator extends Simulator {
         return fuelConsumption;
     }
 
-    /**
-     * Perform CHANGE_CAR action
-     *
-     * @param a a CHANGE_CAR action object
-     * @return the next state
-     */
     private State performA2(Action a) {
 
         if (currentState.getCarType().equals(a.getCarType())) {
@@ -323,30 +258,12 @@ public class ActionSimulator extends Simulator {
         return currentState.changeCarType(a.getCarType());
     }
 
-    /**
-     * Perform CHANGE_DRIVER action
-     *
-     * @param a a CHANGE_DRIVER action object
-     * @return the next state
-     */
     private State performA3(Action a) { return currentState.changeDriver(a.getDriverType()); }
 
-    /**
-     * Perform the CHANGE_TIRES action
-     *
-     * @param a a CHANGE_TIRES action object
-     * @return the next state
-     */
     private State performA4(Action a) {
         return currentState.changeTires(a.getTireModel());
     }
 
-    /**
-     * Perform the ADD_FUEL action
-     *
-     * @param a a ADD_FUEL action object
-     * @return the next state
-     */
     private State performA5(Action a) {
         // calculate number of steps used for refueling (minus 1 since we add
         // 1 in main function
@@ -355,24 +272,11 @@ public class ActionSimulator extends Simulator {
         return currentState.addFuel(a.getFuel());
     }
 
-    /**
-     * Perform the CHANGE_PRESSURE action
-     *
-     * @param a a CHANGE_PRESSURE action object
-     * @return the next state
-     */
     private State performA6(Action a) {
         return currentState.changeTirePressure(a.getTirePressure());
     }
 
-    /**
-     * Perform the CHANGE_CAR_AND_DRIVER action
-     *
-     * @param a a CHANGE_CAR_AND_DRIVER action object
-     * @return the next state
-     */
     private State performA7(Action a) {
-
         if (currentState.getCarType().equals(a.getCarType())) {
             // if car the same, only change driver so no sneaky fuel exploit
             return currentState.changeDriver(a.getDriverType());
@@ -381,15 +285,22 @@ public class ActionSimulator extends Simulator {
                 a.getDriverType());
     }
 
-    /**
-     * Perform the CHANGE_TIRE_FUEL_PRESSURE action
-     *
-     * @param a a CHANGE_TIRE_FUEL_PRESSURE action object
-     * @return the next state
-     */
     private State performA8(Action a) {
         return currentState.changeTireFuelAndTirePressure(a.getTireModel(),
                 a.getFuel(), a.getTirePressure());
     }
+
+
+    public Boolean isGoalState(State s) {
+        if (s == null) {
+            return false;
+        }
+        return s.getPos() >= ps.getN();
+    }
+
+    public int getSteps() {
+        return steps;
+    }
+
 
 }

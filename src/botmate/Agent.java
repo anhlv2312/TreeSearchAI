@@ -7,50 +7,54 @@ import java.util.*;
 
 public class Agent {
 
-    class Node {
-        Action action;
-        double value;
-        int visitCount;
-        Node(Action action) {
-            this.action = action;
-            this.value = 0;
-            this.visitCount = 0;
-        }
-    }
-
     private static final double EXP_CONST = 1;
     private static final double EPSILON = 1e-6;
-    private final static int SAMPLE_COUNT = 1000;
+    private static final double GAMMA = 0.95;
+    private final static int SAMPLE_COUNT = 10000;
     private Random random = new Random();
     private ProblemSpec ps;
-    private ActionSimulator sim;
-    private List<Node> nodes;
+    private MCTSSimulator sim;
+    private List<StateNode> nodes;
+    private State rootState;
+    private StateNode rootNode;
     private int visitCount;
 
     Agent(ProblemSpec ps) {
         this.ps = ps;
     }
 
-    public Action selectAction(State currentState) {
+    public Action selectBestAction(State currentState) {
+        rootState = currentState;
         visitCount = 0;
+        rootNode = new StateNode(null);
+        expand(rootNode, rootState);
+        while (true) {
+
+        }
+
+
         nodes = new ArrayList<>();
-        for (Action action: generateActions(currentState)) {
-            nodes.add(new Node(action));
-        }
-        int count = 0;
-        while (count < SAMPLE_COUNT){
-            Node node = this.getBestNode();
+
+        while (visitCount < SAMPLE_COUNT){
+            StateNode node = this.getBestNode();
             runSimulation(node, currentState);
-            count++;
+            visitCount++;
         }
-        return this.getBestNode().action;
+        return this.getBestNode().getAction();
     }
 
-    private Node getBestNode() {
-        Node selected = null;
-        double bestValue = Double.NEGATIVE_INFINITY;
-        for (Node node : nodes) {
-            double UCT = node.value + EXP_CONST * Math.sqrt(Math.log(visitCount+1)/(node.visitCount+ EPSILON));
+
+    private void expand(StateNode currentNode, State currentState) {
+        for (Action action: generateActions(currentState)) {
+            nodes.add(new StateNode(action));
+        }
+    }
+
+    private StateNode getBestNode() {
+        StateNode selected = null;
+        double bestValue = -Double.MAX_VALUE;
+        for (StateNode node : nodes) {
+            double UCT = node.getValue() + EXP_CONST * Math.sqrt(Math.log(visitCount+1)/(node.getVisitCount()+ EPSILON));
             if (UCT > bestValue) {
                 selected = node;
                 bestValue = UCT;
@@ -64,22 +68,22 @@ public class Agent {
         return actions.get(random.nextInt(actions.size()));
     }
 
-    private void runSimulation(Node node, State state) {
+    private void runSimulation(StateNode node, State state) {
         int depth = 30;
-        this.sim = new ActionSimulator(ps);
+        this.sim = new MCTSSimulator(ps);
         this.sim.setCurrentState(state);
         State currentState = state;
-        State nextState = sim.step(node.action);
-        node.value = nextState.getPos() - state.getPos();
+        State nextState = sim.step(node.getAction());
+        node.updateValue(nextState.getPos() - state.getPos());
         double totalValue = 0.0;
 
         for (int i = 0; i <= depth; i ++) {
             int previousPos = currentState.getPos();
             currentState = sim.step(selectRandomAction(currentState));
-            totalValue += (currentState.getPos() - previousPos) * Math.pow(0.9, depth);
+            totalValue += (currentState.getPos() - previousPos) * Math.pow(GAMMA, depth);
         }
-        node.value = (node.value * node.visitCount + totalValue) / (node.visitCount + 1);
-        node.visitCount++;
+        node.updateValue((node.getValue() * node.getVisitCount() + totalValue) / (node.getVisitCount() + 1));
+        node.increaseVisitCount();
     }
 
 
@@ -92,7 +96,6 @@ public class Agent {
         List<Action> actions = new ArrayList<>();
 
         actions.add(new Action(ActionType.MOVE));
-
 
         if (ps.getLevel().isValidActionForLevel(ActionType.CHANGE_CAR)) {
             for (String car : ps.getCarOrder()) {
@@ -163,6 +166,37 @@ public class Agent {
 //        }
 
         return actions;
+    }
+
+//    private  double backTracking(StateNode node, int depth){
+//        double totalValue = 0.0;
+//        StateNode currentNode = node ;
+//
+//        try {
+//            while (depth >= 0) {
+//                currentNode = currentNode.parent;
+//                if (currentNode.children != null) {
+//                    totalValue += currentNode.child.value + (getReward(currentNode.state) * Math.pow(GAMMA, depth));
+//                } else {
+//                    totalValue += (getReward(currentNode.state) * Math.pow(GAMMA, depth));
+//                }
+//                currentNode.value = (currentNode.value * currentNode.visitCount + totalValue) / (currentNode.visitCount + 1);
+//
+//                depth--;
+//            }
+//        }catch (Exception ex){
+//            System.out.println(ex.toString());
+//        }
+//
+//        return currentNode.value;
+//    }
+
+    private int getReward(State state) {
+        if (sim.isGoalState(state)) {
+            return 2 * ps.getN();
+        } else {
+            return state.getPos();
+        }
     }
 
 }

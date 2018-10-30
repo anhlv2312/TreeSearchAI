@@ -47,7 +47,7 @@ public class LearningAgent {
 
         ConditionNode(Condition condition) {
             this.condition = condition;
-            this.value = Double.POSITIVE_INFINITY;
+            this.value = 0;
             this.visitCount = 0;
         }
 
@@ -58,9 +58,9 @@ public class LearningAgent {
         @Override
         public int compareTo(ConditionNode o) {
             if (this.value > o.value) {
-                return -1;
-            } else if (this.value > o.value) {
                 return 1;
+            } else if (this.value > o.value) {
+                return -1;
             } else {
                 return 0;
             }
@@ -70,11 +70,11 @@ public class LearningAgent {
     private Map<Terrain, Condition> policy = new HashMap<>();
     private PriorityQueue<ConditionNode> conditionNodes = new PriorityQueue<>();
     private ProblemSpec ps;
-    private ActionSimulator sim;
+    private MCTSSimulator sim;
 
     public LearningAgent(ProblemSpec ps) {
         this.ps = ps;
-        this.sim = new ActionSimulator(ps);
+        this.sim = new MCTSSimulator(ps);
     }
 
     public List<Action> getActions(State state) {
@@ -110,9 +110,8 @@ public class LearningAgent {
             node.value = (node.value * node.visitCount + value) / (node.visitCount + 1);
             node.visitCount++;
         }
-        System.out.println(node.visitCount);
+        System.out.println(node.visitCount + " " + node.value);
         return conditionNodes.poll().condition;
-
     }
 
     private PriorityQueue<ConditionNode> generatePossibleCondition(State state) {
