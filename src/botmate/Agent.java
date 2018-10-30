@@ -78,8 +78,14 @@ public class Agent {
             State previousState = sim.getCurrentState();
             List<Action> actions = generateActions(previousState);
             State currentState = sim.step(actions.get(random.nextInt(actions.size())));
-
-            value += currentState.getPos() * Math.pow(GAMMA, i);
+            if (sim.isGoalState(currentState)) {
+                value += 2 * ps.getN() * Math.pow(GAMMA, i);
+            } else {
+                value += currentState.getPos() * Math.pow(GAMMA, i);
+            }
+            if (sim.getSteps() > ps.getMaxT()) {
+                return value;
+            }
         }
         return value;
     }
