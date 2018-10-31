@@ -30,6 +30,8 @@ public class Agent {
         this.remainingStep = remainingStep;
         this.sim = new RollOutSimulator(ps, currentState);
 
+        System.out.print(currentState);
+
         while (System.currentTimeMillis() - startTime < TIMEOUT) {
             TreeNode promisingNode = selectPromisingNode(rootNode);
             promisingNode.expand(generateActions(sim.getCurrentState()));
@@ -39,13 +41,15 @@ public class Agent {
             backPropagation(nodeToExpand);
         }
 
+        Action action = rootNode.selectBestChild().getAction();
+        System.out.print(action.getActionType());
+
         for (TreeNode node : rootNode.getChildren()) {
-            System.out.print("A" + node.getAction().getActionType().getActionNo() + "(" + node.getVisitCount() + "|" + (int)node.getValue() + ") ");
+            System.out.print(" A" + node.getAction().getActionType().getActionNo() + "(" + node.getVisitCount() + "|" + (int)node.getValue() + ") ");
         }
 
         System.out.println();
-        Action action = rootNode.selectBestChild().getAction();
-        System.out.println(action.getActionType());
+        System.out.println();
 
         return action;
 

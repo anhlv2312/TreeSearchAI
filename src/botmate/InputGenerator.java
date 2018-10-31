@@ -11,7 +11,8 @@ import java.util.*;
 public class InputGenerator {
 
     public static void main(String[] args) {
-        generateInputFile(5, "botmate.input.txt");
+        String outputString = generateInput(5);
+        System.out.println(outputString);
     }
 
     public static void generateInputFile(int level, String fileName) {
@@ -19,7 +20,6 @@ public class InputGenerator {
             String outputString = generateInput(level);
             output.write(outputString);
             System.out.println(outputString);
-
         } catch (IOException e) {
             System.out.println(e.toString());
         }
@@ -183,7 +183,7 @@ public class InputGenerator {
         sb.append("\n");
         //print slip probability at 50% pressure for all terrains
         for (int i=0;i<terrainPool.size();i++) {
-            sb.append(((double)r.nextInt(40)+10)/100);
+            sb.append((double)r.nextInt(10 + (10 * level))/100);
             sb.append(" ");
         }
 
