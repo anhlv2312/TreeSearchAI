@@ -177,13 +177,13 @@ public class InputGenerator {
 
         //print NT*CT fuel efficiencies
         for (int i=0;i<NT_CT;i++) {
-            sb.append(1 + r.nextInt(5));
+            sb.append(1 + r.nextInt(8));
             sb.append(" ");
         }
         sb.append("\n");
         //print slip probability at 50% pressure for all terrains
         for (int i=0;i<terrainPool.size();i++) {
-            sb.append(((double)r.nextInt(20)+5)/100);
+            sb.append(((double)r.nextInt(30)+5)/100);
             sb.append(" ");
         }
 
