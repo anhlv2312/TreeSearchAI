@@ -9,17 +9,23 @@ public class Agent {
 
     public static final double EXPLORATION_CONST = 100; // Math.sqrt(2);
     public static final double GAMMA = 0.9;
-    public static final int TIMEOUT = 1000;
+    public static final int TIMEOUT = 10000;
     public static final int SIMULATION_DEPTH = 30;
     private ProblemSpec ps;
     private MCTSSimulator sim;
     private State rootState;
     private ActionNode rootNode;
     private Random random;
+    List<TirePressure> tirePressures;
 
     Agent(ProblemSpec ps) {
         this.ps = ps;
         this.random = new Random();
+        tirePressures = new ArrayList<>();
+        tirePressures.add(TirePressure.ONE_HUNDRED_PERCENT);
+        tirePressures.add(TirePressure.SEVENTY_FIVE_PERCENT);
+        tirePressures.add(TirePressure.FIFTY_PERCENT);
+
     }
 
     public Action selectBestAction(State currentState) {
@@ -35,16 +41,18 @@ public class Agent {
             promisingNode.expand(generateActions(sim.getCurrentState()));
             ActionNode nodeToExpand = promisingNode.getRandomChild();
             sim.step(nodeToExpand.getAction());
-
             nodeToExpand.setValue(rollOut());
             backPropagation(nodeToExpand);
         }
 
         for (ActionNode node : rootNode.getChildren()) {
-            System.out.print(node.getAction().getActionType() + " (" + node.getVisitCount() + ", " + (int)node.getValue() + ") | ");
+            System.out.print(node.getAction().getActionType().getActionNo() + " (" + node.getVisitCount() + ", " + (int)node.getValue() + ") | ");
         }
         System.out.println();
-        return rootNode.selectBestNode().getAction();
+        Action action = rootNode.selectBestNode().getAction();
+        System.out.println(action.getActionType());
+
+        return action;
 
     }
 
@@ -77,7 +85,9 @@ public class Agent {
         for (int i = 0; i <= SIMULATION_DEPTH; i ++) {
             State previousState = sim.getCurrentState();
             List<Action> actions = generateActions(previousState);
+            sim.step(new Action(ActionType.MOVE));
             State currentState = sim.step(actions.get(random.nextInt(actions.size())));
+
             if (sim.isGoalState(currentState)) {
                 value += 2 * ps.getN() * Math.pow(GAMMA, i);
             } else {
@@ -132,12 +142,6 @@ public class Agent {
 
         if (ps.getLevel().isValidActionForLevel(ActionType.CHANGE_PRESSURE)) {
 
-            List<TirePressure> tirePressures = new ArrayList<>();
-
-            tirePressures.add(TirePressure.ONE_HUNDRED_PERCENT);
-            tirePressures.add(TirePressure.SEVENTY_FIVE_PERCENT);
-            tirePressures.add(TirePressure.FIFTY_PERCENT);
-
             for (TirePressure tirePressure : tirePressures) {
                 if (currentState != null && !tirePressure.equals(currentState.getTirePressure())) {
                     actions.add(new Action(ActionType.CHANGE_PRESSURE, tirePressure));
@@ -149,20 +153,26 @@ public class Agent {
         if (ps.getLevel().isValidActionForLevel(ActionType.CHANGE_CAR_AND_DRIVER)) {
             for (String car : ps.getCarOrder()) {
                 for (String driver : ps.getDriverOrder()) {
-                    actions.add(new Action(ActionType.CHANGE_CAR_AND_DRIVER, car, driver));
+                    if (currentState != null &&
+                            !car.equals(currentState.getCarType()) &&
+                            !driver.equals(currentState.getDriver())) {
+                        actions.add(new Action(ActionType.CHANGE_CAR_AND_DRIVER, car, driver));
+                    }
                 }
             }
         }
-//
-//        if (ps.getLevel().isValidActionForLevel(ActionType.CHANGE_TIRE_FUEL_PRESSURE)) {
-//            for (Tire tire : ps.getTireOrder()) {
-//                for (int i = 1; i < 5; i++) {
-//                    actions.add(new Action(ActionType.CHANGE_TIRE_FUEL_PRESSURE, tire, i * 10, TirePressure.ONE_HUNDRED_PERCENT));
-//                    actions.add(new Action(ActionType.CHANGE_TIRE_FUEL_PRESSURE, tire, i * 10, TirePressure.SEVENTY_FIVE_PERCENT));
-//                    actions.add(new Action(ActionType.CHANGE_TIRE_FUEL_PRESSURE, tire, i * 10, TirePressure.FIFTY_PERCENT));
-//                }
-//            }
-//        }
+
+        if (ps.getLevel().isValidActionForLevel(ActionType.CHANGE_TIRE_FUEL_PRESSURE)) {
+            for (Tire tire : ps.getTireOrder()) {
+                for (TirePressure tirePressure : tirePressures) {
+                    if (currentState != null) {
+                        for (int i = 1; i < (50 - currentState.getFuel()) / 10; i++) {
+                            actions.add(new Action(ActionType.CHANGE_TIRE_FUEL_PRESSURE, tire, i * 10, tirePressure));
+                        }
+                    }
+                }
+            }
+        }
 
         return actions;
     }
