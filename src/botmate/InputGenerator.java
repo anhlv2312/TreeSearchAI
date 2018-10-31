@@ -1,35 +1,60 @@
 package botmate;
 
+import simulator.Step;
+
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.*;
 
 public class InputGenerator {
 
-    public static void main(String[] args){
-        //print level
+    public static void main(String[] args) {
+        generateInputFile(1, "botmate.input.txt");
+    }
 
-        int level = 1;
-        System.out.println(level);
+    public static void generateInputFile(int level, String fileName) {
+        try (BufferedWriter output = new BufferedWriter(new FileWriter(fileName))) {
+            String outputString = generateInput(level);
+            output.write(outputString);
+            System.out.println(outputString);
+
+        } catch (IOException e) {
+            System.out.println(e.toString());
+        }
+    }
+
+    public static String generateInput(int level) {
+        StringBuilder sb = new StringBuilder();
+
+        sb.append(level);
+        sb.append("\n");
         Random r =new Random();
         DecimalFormat df2=new DecimalFormat(".##");
-        int lv=level;
+
         List<String> terrainPool=new ArrayList<>();
-        List<String> terrains=new ArrayList<>();
+        List<String> environment=new ArrayList<>();
         List<String> driverPool=new ArrayList<>();
         List<String> carPool=new ArrayList<>();
+        List<String> tirePool=new ArrayList<>();
 
         //print gamma
         double gamma=0.8+((double)r.nextInt(20))/100;
-        System.out.print(df2.format(gamma));
+        sb.append(df2.format(gamma));
         int slipTime=1+r.nextInt(5);
         int breakTime=1+r.nextInt(5);
-        System.out.println(" "+slipTime+" "+ breakTime);
+        sb.append(" ");
+        sb.append(slipTime);
+        sb.append(" ");
+        sb.append(breakTime);
+        sb.append("\n");
 
 
-        int N=2;//intialize N as 2 first, then update N by level
+        int N=2; //intialize N as 2 first, then update N by level
         int maxT;
 
-        if (lv==1) {
+        if (level==1) {
             N=2+r.nextInt(8);
             terrainPool.add("dirt");
             terrainPool.add("asphalt");
@@ -37,7 +62,7 @@ public class InputGenerator {
             driverPool.add("driverB");
             carPool.add("carA");
             carPool.add("carB");
-        } else if (lv==2) {
+        } else if (level==2) {
             N=2+r.nextInt(8);
             terrainPool.add("dirt-straight");
             terrainPool.add("dirt-slalom");
@@ -49,7 +74,7 @@ public class InputGenerator {
             carPool.add("carB");
             carPool.add("carC");
 
-        } else if (lv>2) {
+        } else if (level>2) {
             N=10+r.nextInt(21);
             terrainPool.add("dirt-straight-hilly");
             terrainPool.add("dirt-straight-flat");
@@ -72,19 +97,29 @@ public class InputGenerator {
 
         }
 
+
+        tirePool.add("all-terrain");
+        tirePool.add("mud");
+        tirePool.add("low-profile");
+        tirePool.add("performance");
+
+
         maxT=2*N+r.nextInt(20);
         //print N and maxT
-        System.out.println(N+" "+ maxT);
+        sb.append(N);
+        sb.append(" ");
+        sb.append(maxT);
+        sb.append("\n");
 
         for (int i=0;i<N;i++) {
-            terrains.add(terrainPool.get(r.nextInt(terrainPool.size())));
+            environment.add(terrainPool.get(r.nextInt(terrainPool.size())));
         }
 
         //System.out.println("Terrain list is : "+ terrains.toString());
 
         HashMap<String,List<Integer>> terrainDict= new HashMap<>();
         int cellNum=1;
-        for (String terrain: terrains) {
+        for (String terrain: environment) {
 
             if (terrainDict.containsKey(terrain)) {
                 terrainDict.get(terrain).add(cellNum);
@@ -98,39 +133,58 @@ public class InputGenerator {
         }
         //print terrain
         for (java.util.Map.Entry<String,List<Integer>> entry:terrainDict.entrySet()) {
-            System.out.println(entry.getKey()+":"+ entry.getValue().toString().replaceAll("[^,0-9]",""));
+            sb.append(entry.getKey());
+            sb.append(":");
+            sb.append(entry.getValue().toString().replaceAll("[^,0-9]",""));
+            sb.append("\n");
         }
         //print car count
-        System.out.println(carPool.size());
+        sb.append(carPool.size());
+        sb.append("\n");
         //print car probabilities
         for (String car: carPool) {
-            System.out.println(car+":"+Arrays.toString(randomDouble()).replaceAll("[^0-9. ]",""));
+            sb.append(car);
+            sb.append(":");
+            sb.append(Arrays.toString(randomDouble()).replaceAll("[^0-9. ]",""));
+            sb.append("\n");
         }
         //print driver count
-        System.out.println(driverPool.size());
+        sb.append(driverPool.size());
+        sb.append("\n");
         //print driver probabilities
         for (String driver: driverPool) {
-            System.out.println(driver+":"+Arrays.toString(randomDouble()).replaceAll("[^0-9. ]",""));
+            sb.append(driver);
+            sb.append(":");
+            sb.append(Arrays.toString(randomDouble()).replaceAll("[^0-9. ]",""));
+            sb.append("\n");
         }
         //print tyre probabilities
-        System.out.println("all-terrain:"+Arrays.toString(randomDouble()).replaceAll("[^0-9. ]",""));
-        System.out.println("mud:"+Arrays.toString(randomDouble()).replaceAll("[^0-9. ]",""));
-        System.out.println("low-profile:"+Arrays.toString(randomDouble()).replaceAll("[^0-9. ]",""));
-        System.out.println("performance:"+Arrays.toString(randomDouble()).replaceAll("[^0-9. ]",""));
+
+        for (String tire: tirePool) {
+            sb.append(tire);
+            sb.append(":");
+            sb.append(Arrays.toString(randomDouble()).replaceAll("[^0-9. ]",""));
+            sb.append("\n");
+        }
 
         int NT_CT=terrainPool.size()*carPool.size();
 
         //print NT*CT fuel efficiencies
         for (int i=0;i<NT_CT;i++) {
-            System.out.print((1+r.nextInt(5))+" ");
+            sb.append(1 + r.nextInt(5));
+            sb.append(" ");
         }
-        System.out.println("\r");
+        sb.append("\n");
         //print slip probability at 50% pressure for all terrains
         for (int i=0;i<terrainPool.size();i++) {
-            System.out.print(((double)r.nextInt(20)+5)/100+ " ");
+            sb.append(((double)r.nextInt(20)+5)/100);
+            sb.append(" ");
         }
+
+        return sb.toString();
     }
-    public static double[] randomDouble(){
+
+    private static double[] randomDouble(){
         int count = 12;
         int sum = 100;
         java.util.Random g = new java.util.Random();
