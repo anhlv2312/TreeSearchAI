@@ -6,16 +6,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-public class ActionNode {
+public class TreeNode {
 
     private Random random;
     private Action action;
-    private ActionNode parent;
-    private List<ActionNode> children;
+    private TreeNode parent;
+    private List<TreeNode> children;
     private double value;
     private int visitCount;
 
-    public ActionNode(Action action) {
+    public TreeNode(Action action) {
         this.random = new Random();
         this.action = action;
         this.children = new ArrayList<>();
@@ -25,15 +25,15 @@ public class ActionNode {
         return action;
     }
 
-    public ActionNode getParent() {
+    public TreeNode getParent() {
         return parent;
     }
 
-    public ActionNode getRandomChild() {
+    public TreeNode getRandomChild() {
         return children.get(random.nextInt(children.size()));
     }
 
-    public List<ActionNode> getChildren() {
+    public List<TreeNode> getChildren() {
         return children;
     }
 
@@ -59,16 +59,16 @@ public class ActionNode {
 
     public void expand(List<Action> actions) {
         for (Action action: actions) {
-            ActionNode newNode = new ActionNode(action);
+            TreeNode newNode = new TreeNode(action);
             newNode.parent = this;
             children.add(newNode);
         }
     }
 
-    public ActionNode selectPromisingChild(double constant) {
-        ActionNode selected = new ActionNode(null);
+    public TreeNode selectPromisingChild(double constant) {
+        TreeNode selected = new TreeNode(null);
         double bestValue = -Double.MAX_VALUE;
-        for (ActionNode childNode : children) {
+        for (TreeNode childNode : children) {
             if (childNode.visitCount == 0) {
                 return childNode;
             }
@@ -81,10 +81,10 @@ public class ActionNode {
         return selected;
     }
 
-    public ActionNode selectBestChild() {
-        ActionNode selected = new ActionNode(null);
+    public TreeNode selectBestChild() {
+        TreeNode selected = new TreeNode(null);
         double bestValue = -Double.MAX_VALUE;
-        for (ActionNode childNode : children) {
+        for (TreeNode childNode : children) {
             if (childNode.getValue() > bestValue) {
                 selected = childNode;
                 bestValue = childNode.getValue();

@@ -9,11 +9,11 @@ import java.util.*;
 public class Agent {
 
     public static final double GAMMA = 0.95;
-    public static final int TIMEOUT = 10000;
+    public static final int TIMEOUT = 1000;
     private ProblemSpec ps;
     private MCTSSimulator sim;
     private State rootState;
-    private ActionNode rootNode;
+    private TreeNode rootNode;
     private Random random;
     private int remainingStep;
     List<TirePressure> tirePressures;
@@ -32,21 +32,21 @@ public class Agent {
         long startTime = System.currentTimeMillis();
 
         rootState = currentState;
-        rootNode = new ActionNode(null);
+        rootNode = new TreeNode(null);
         this.remainingStep = remainingStep;
         this.sim = new MCTSSimulator(ps, rootState);
 
 
         while (System.currentTimeMillis() - startTime < TIMEOUT) {
-            ActionNode promisingNode = selectPromisingNode(rootNode);
+            TreeNode promisingNode = selectPromisingNode(rootNode);
             promisingNode.expand(generateActions(sim.getCurrentState()));
-            ActionNode nodeToExpand = promisingNode.getRandomChild();
+            TreeNode nodeToExpand = promisingNode.getRandomChild();
             sim.step(nodeToExpand.getAction());
             nodeToExpand.setValue(rollOut());
             backPropagation(nodeToExpand);
         }
 
-        for (ActionNode node : rootNode.getChildren()) {
+        for (TreeNode node : rootNode.getChildren()) {
             System.out.print("A" + node.getAction().getActionType().getActionNo() + "(" + node.getVisitCount() + "|" + (int)node.getValue() + ") ");
         }
         System.out.println();
@@ -57,9 +57,9 @@ public class Agent {
 
     }
 
-    private ActionNode selectPromisingNode(ActionNode rootNode) {
+    private TreeNode selectPromisingNode(TreeNode rootNode) {
         sim.reset();
-        ActionNode currentNode = rootNode;
+        TreeNode currentNode = rootNode;
         while (!currentNode.isLeafNode()) {
             currentNode = currentNode.selectPromisingChild(3*ps.getN());
             sim.step(currentNode.getAction());
@@ -67,12 +67,12 @@ public class Agent {
         return currentNode;
     }
 
-    private void backPropagation(ActionNode leafNode) {
-        ActionNode currentNode = leafNode;
+    private void backPropagation(TreeNode leafNode) {
+        TreeNode currentNode = leafNode;
         while (currentNode != null) {
             currentNode.increaseVisitCount();
             double q = currentNode.getValue();
-            ActionNode parentNode = currentNode.getParent();
+            TreeNode parentNode = currentNode.getParent();
             if (parentNode!=null) {
                 parentNode.setValue((parentNode.getValue() * parentNode.getVisitCount() + q) / (parentNode.getVisitCount() + 1));
             }
