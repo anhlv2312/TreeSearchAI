@@ -26,7 +26,7 @@ public class Solver {
         State currentState = sim.reset();
         while (true) {
             System.out.print(currentState);
-            Action action = agent.selectBestAction(currentState);
+            Action action = agent.selectBestAction(currentState, ps.getMaxT()-sim.getSteps());
             currentState = sim.step(action);
             if (sim.isGoalState(currentState)) {
                 System.out.println("Reached the GOAL!" );

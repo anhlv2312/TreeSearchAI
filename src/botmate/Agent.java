@@ -5,17 +5,17 @@ import simulator.State;
 
 import java.util.*;
 
+// TODO: this agent keep moving instead of change tire pressure to 50% for the level5
 public class Agent {
 
-    public static final double EXPLORATION_CONST = 100; // Math.sqrt(2);
-    public static final double GAMMA = 0.9;
+    public static final double GAMMA = 0.95;
     public static final int TIMEOUT = 10000;
-    public static final int SIMULATION_DEPTH = 30;
     private ProblemSpec ps;
     private MCTSSimulator sim;
     private State rootState;
     private ActionNode rootNode;
     private Random random;
+    private int remainingStep;
     List<TirePressure> tirePressures;
 
     Agent(ProblemSpec ps) {
@@ -28,11 +28,12 @@ public class Agent {
 
     }
 
-    public Action selectBestAction(State currentState) {
+    public Action selectBestAction(State currentState, int remainingStep) {
         long startTime = System.currentTimeMillis();
 
         rootState = currentState;
         rootNode = new ActionNode(null);
+        this.remainingStep = remainingStep;
         this.sim = new MCTSSimulator(ps, rootState);
 
 
@@ -46,10 +47,10 @@ public class Agent {
         }
 
         for (ActionNode node : rootNode.getChildren()) {
-            System.out.print(node.getAction().getActionType().getActionNo() + " (" + node.getVisitCount() + ", " + (int)node.getValue() + ") | ");
+            System.out.print("A" + node.getAction().getActionType().getActionNo() + "(" + node.getVisitCount() + "|" + (int)node.getValue() + ") ");
         }
         System.out.println();
-        Action action = rootNode.selectBestNode().getAction();
+        Action action = rootNode.selectBestChild().getAction();
         System.out.println(action.getActionType());
 
         return action;
@@ -60,7 +61,7 @@ public class Agent {
         sim.reset();
         ActionNode currentNode = rootNode;
         while (!currentNode.isLeafNode()) {
-            currentNode = currentNode.selectBestNode();
+            currentNode = currentNode.selectPromisingChild(3*ps.getN());
             sim.step(currentNode.getAction());
         }
         return currentNode;
@@ -82,12 +83,12 @@ public class Agent {
     private double rollOut() {
         double value = 0;
         // TODO: change to iterate to the maximum of the number of remaining step
-        for (int i = 0; i <= SIMULATION_DEPTH; i ++) {
+        for (int i = 0; i <= remainingStep/2; i ++) {
             State previousState = sim.getCurrentState();
             List<Action> actions = generateActions(previousState);
             sim.step(new Action(ActionType.MOVE));
             State currentState = sim.step(actions.get(random.nextInt(actions.size())));
-
+            // TODO: need to take the number of step to account ? may be not because if not reach the goal then reduce the value
             if (sim.isGoalState(currentState)) {
                 value += 2 * ps.getN() * Math.pow(GAMMA, i);
             } else {

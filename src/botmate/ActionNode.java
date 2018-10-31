@@ -65,17 +65,29 @@ public class ActionNode {
         }
     }
 
-    public ActionNode selectBestNode() {
+    public ActionNode selectPromisingChild(double constant) {
         ActionNode selected = new ActionNode(null);
         double bestValue = -Double.MAX_VALUE;
         for (ActionNode childNode : children) {
             if (childNode.visitCount == 0) {
                 return childNode;
             }
-            double utcValue = childNode.value + Agent.EXPLORATION_CONST * Math.sqrt(Math.log(this.visitCount) / (childNode.visitCount));
+            double utcValue = childNode.value + constant * Math.sqrt(Math.log(this.visitCount) / (childNode.visitCount));
             if (utcValue > bestValue) {
                 selected = childNode;
                 bestValue = utcValue;
+            }
+        }
+        return selected;
+    }
+
+    public ActionNode selectBestChild() {
+        ActionNode selected = new ActionNode(null);
+        double bestValue = -Double.MAX_VALUE;
+        for (ActionNode childNode : children) {
+            if (childNode.getValue() > bestValue) {
+                selected = childNode;
+                bestValue = childNode.getValue();
             }
         }
         return selected;
