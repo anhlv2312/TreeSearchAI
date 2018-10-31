@@ -11,7 +11,7 @@ import java.util.*;
 public class InputGenerator {
 
     public static void main(String[] args) {
-        generateInputFile(1, "botmate.input.txt");
+        generateInputFile(5, "botmate.input.txt");
     }
 
     public static void generateInputFile(int level, String fileName) {
@@ -55,7 +55,7 @@ public class InputGenerator {
         int maxT;
 
         if (level==1) {
-            N=2+r.nextInt(8);
+            N=8+r.nextInt(5);
             terrainPool.add("dirt");
             terrainPool.add("asphalt");
             driverPool.add("driverA");
@@ -63,7 +63,7 @@ public class InputGenerator {
             carPool.add("carA");
             carPool.add("carB");
         } else if (level==2) {
-            N=2+r.nextInt(8);
+            N=8+r.nextInt(5);
             terrainPool.add("dirt-straight");
             terrainPool.add("dirt-slalom");
             terrainPool.add("asphalt-straight");
@@ -75,7 +75,7 @@ public class InputGenerator {
             carPool.add("carC");
 
         } else if (level>2) {
-            N=10+r.nextInt(21);
+            N=30+r.nextInt(10);
             terrainPool.add("dirt-straight-hilly");
             terrainPool.add("dirt-straight-flat");
             terrainPool.add("dirt-slalom-hilly");
@@ -103,8 +103,7 @@ public class InputGenerator {
         tirePool.add("low-profile");
         tirePool.add("performance");
 
-
-        maxT=2*N+r.nextInt(20);
+        maxT=2*N+r.nextInt(10);
         //print N and maxT
         sb.append(N);
         sb.append(" ");
@@ -117,13 +116,14 @@ public class InputGenerator {
 
         //System.out.println("Terrain list is : "+ terrains.toString());
 
-        HashMap<String,List<Integer>> terrainDict= new HashMap<>();
+        //TODO: make sure the environment has everytype of terrain
+
+        HashMap<String,List<Integer>> terrainDict = new HashMap<>();
         int cellNum=1;
         for (String terrain: environment) {
 
             if (terrainDict.containsKey(terrain)) {
                 terrainDict.get(terrain).add(cellNum);
-                terrainDict.put(terrain,terrainDict.get(terrain));
             }else{
                 List<Integer> newList=new ArrayList<>();
                 newList.add(cellNum);
@@ -140,7 +140,7 @@ public class InputGenerator {
             if (terrainDictEntry != null) {
                 sb.append(terrainDict.get(terrainType).toString().replaceAll("[^,0-9]", ""));
             } else {
-                sb.append("0");
+                sb.append("1");
             }
             sb.append("\n");
         }
@@ -177,13 +177,13 @@ public class InputGenerator {
 
         //print NT*CT fuel efficiencies
         for (int i=0;i<NT_CT;i++) {
-            sb.append(1 + r.nextInt(8));
+            sb.append(1 + r.nextInt(5));
             sb.append(" ");
         }
         sb.append("\n");
         //print slip probability at 50% pressure for all terrains
         for (int i=0;i<terrainPool.size();i++) {
-            sb.append(((double)r.nextInt(30)+5)/100);
+            sb.append(((double)r.nextInt(40)+10)/100);
             sb.append(" ");
         }
 

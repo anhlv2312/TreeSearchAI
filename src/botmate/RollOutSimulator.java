@@ -3,14 +3,14 @@ package botmate;
 import problem.*;
 import simulator.State;
 
-public class MCTSSimulator {
+public class RollOutSimulator {
 
     private ProblemSpec ps;
     private State rootState;
     private State currentState;
     private int steps;
 
-    public MCTSSimulator(ProblemSpec ps, State rootState) {
+    public RollOutSimulator(ProblemSpec ps, State rootState) {
         this.ps = ps;
         this.currentState = rootState;
         this.rootState = rootState;
@@ -113,7 +113,7 @@ public class MCTSSimulator {
         return nextState;
     }
 
-    public int sampleMoveDistance() {
+    private int sampleMoveDistance() {
 
         double[] moveProbs = getMoveProbs();
 
