@@ -132,10 +132,16 @@ public class InputGenerator {
             cellNum++;
         }
         //print terrain
-        for (java.util.Map.Entry<String,List<Integer>> entry:terrainDict.entrySet()) {
-            sb.append(entry.getKey());
+        for (String terrainType:terrainPool) {
+
+            sb.append(terrainType);
             sb.append(":");
-            sb.append(entry.getValue().toString().replaceAll("[^,0-9]",""));
+            List<Integer> terrainDictEntry = terrainDict.get(terrainType);
+            if (terrainDictEntry != null) {
+                sb.append(terrainDict.get(terrainType).toString().replaceAll("[^,0-9]", ""));
+            } else {
+                sb.append("0");
+            }
             sb.append("\n");
         }
         //print car count

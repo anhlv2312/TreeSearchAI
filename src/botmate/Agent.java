@@ -41,9 +41,9 @@ public class Agent {
         }
 
         for (ActionNode node : rootNode.getChildren()) {
-            System.out.println(node.getAction().getActionType() + " " + node.getVisitCount() + " " + node.getValue());
+            System.out.print(node.getAction().getActionType() + " (" + node.getVisitCount() + ", " + (int)node.getValue() + ") | ");
         }
-
+        System.out.println();
         return rootNode.selectBestNode().getAction();
 
     }

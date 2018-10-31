@@ -21,17 +21,21 @@ public class Solver {
     }
 
     public static void solveProblem(ProblemSpec ps, Simulator sim) {
+        double startTime = System.currentTimeMillis();
         Agent agent = new Agent(ps);
-        State state = sim.reset();
+        State currentState = sim.reset();
         while (true) {
-            System.out.print(state);
-            Action action = agent.selectBestAction(state);
-            System.out.println(action.getActionType());
-            state = sim.step(action);
-            if (sim.isGoalState(state) || state == null) {
+            System.out.print(currentState);
+            Action action = agent.selectBestAction(currentState);
+            currentState = sim.step(action);
+            if (sim.isGoalState(currentState)) {
+                System.out.println("Reached the GOAL!" );
+                break;
+            } else if (currentState == null) {
+                System.out.println("Failed!" );
                 break;
             }
         }
-
+        System.out.println(String.format("Total time: %.2f seconds", (System.currentTimeMillis() - startTime)/1000));
     }
 }
