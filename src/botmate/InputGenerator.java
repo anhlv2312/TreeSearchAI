@@ -1,7 +1,5 @@
 package botmate;
 
-import simulator.Step;
-
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -51,11 +49,11 @@ public class InputGenerator {
         sb.append("\n");
 
 
-        int N=2; //intialize N as 2 first, then update N by level
+        int N;
         int maxT;
 
         if (level==1) {
-            N=8+r.nextInt(5);
+            N = 7 + r.nextInt(3);
             terrainPool.add("dirt");
             terrainPool.add("asphalt");
             driverPool.add("driverA");
@@ -63,7 +61,7 @@ public class InputGenerator {
             carPool.add("carA");
             carPool.add("carB");
         } else if (level==2) {
-            N=8+r.nextInt(5);
+            N= 7 + r.nextInt(3);
             terrainPool.add("dirt-straight");
             terrainPool.add("dirt-slalom");
             terrainPool.add("asphalt-straight");
@@ -74,8 +72,8 @@ public class InputGenerator {
             carPool.add("carB");
             carPool.add("carC");
 
-        } else if (level>2) {
-            N=30+r.nextInt(10);
+        } else {
+            N = 30 + r.nextInt(10);
             terrainPool.add("dirt-straight-hilly");
             terrainPool.add("dirt-straight-flat");
             terrainPool.add("dirt-slalom-hilly");
@@ -94,7 +92,6 @@ public class InputGenerator {
             carPool.add("carC");
             carPool.add("carD");
             carPool.add("carE");
-
         }
 
 
@@ -103,14 +100,15 @@ public class InputGenerator {
         tirePool.add("low-profile");
         tirePool.add("performance");
 
-        maxT=2*N+r.nextInt(10);
+        maxT = 2 * N + r.nextInt(10);
+
         //print N and maxT
         sb.append(N);
         sb.append(" ");
         sb.append(maxT);
         sb.append("\n");
 
-        for (int i=0;i<N;i++) {
+        for (int i=0; i < N; i++) {
             environment.add(terrainPool.get(r.nextInt(terrainPool.size())));
         }
 

@@ -30,8 +30,8 @@ public class DummyTest {
             System.out.print(currentState);
             currentState = sim.step(new Action(ActionType.MOVE));
 
-            if (currentState != null && currentState.getFuel() < 10 ) {
-                currentState = sim.step(new Action(ActionType.ADD_FUEL, 50));
+            if (currentState != null && currentState.getFuel() < 20 ) {
+                currentState = sim.step(new Action(ActionType.ADD_FUEL, 30));
             }
 
         }

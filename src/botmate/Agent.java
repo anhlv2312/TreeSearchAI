@@ -7,7 +7,7 @@ import java.util.*;
 
 public class Agent {
 
-    private static final int TIMEOUT = 1000;
+
     private ProblemSpec ps;
     private RollOutSimulator sim;
     private Random random;
@@ -32,7 +32,7 @@ public class Agent {
 
         System.out.print(currentState);
 
-        while (System.currentTimeMillis() - startTime < TIMEOUT) {
+        while (System.currentTimeMillis() - startTime < Solver.EXPLORATION_TIMEOUT) {
             TreeNode promisingNode = selectPromisingNode(rootNode);
             promisingNode.expand(generateActions(sim.getCurrentState()));
             TreeNode nodeToExpand = promisingNode.getRandomChild();
@@ -59,7 +59,7 @@ public class Agent {
         sim.reset();
         TreeNode currentNode = rootNode;
         while (!currentNode.isLeafNode()) {
-            currentNode = currentNode.selectPromisingChild(ps.getN());
+            currentNode = currentNode.selectPromisingChild();
             sim.step(currentNode.getAction());
         }
         return currentNode;
@@ -80,14 +80,13 @@ public class Agent {
 
     private double rollOut() {
         double value = 0;
-
         for (int i = 0; i <= remainingStep; i ++) {
             State previousState = sim.getCurrentState();
             List<Action> actions = generateActions(previousState);
             State currentState = sim.step(actions.get(random.nextInt(actions.size())));
             int bonus = sim.isGoalState(currentState)? 5 : 0;
             double penalty = Math.log(sim.getSteps());
-            value += (currentState.getPos() + bonus - penalty) * Math.pow(ps.getDiscountFactor(), i);
+            value += (currentState.getPos() + bonus - penalty) * Math.pow(Solver.DISCOUNT_FACTOR, i);
 
         }
         return value;
