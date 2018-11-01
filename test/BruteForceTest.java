@@ -31,6 +31,7 @@ public class BruteForceTest {
     public void level5() throws IOException {
         assertTrue(testLevel(5));
     }
+
     private boolean testLevel(int level) throws IOException {
         String inputFile = "test." + level + ".input.txt";
         String outputFile = "test." + level + ".output.txt";
