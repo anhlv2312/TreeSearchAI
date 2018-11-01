@@ -7,7 +7,6 @@ import java.util.*;
 
 public class Agent {
 
-
     private ProblemSpec ps;
     private RollOutSimulator sim;
     private Random random;
@@ -41,17 +40,16 @@ public class Agent {
             backPropagation(nodeToExpand);
         }
 
-        Action action = rootNode.selectBestChild().getAction();
-        System.out.print(action.getActionType());
 
         for (TreeNode node : rootNode.getChildren()) {
-            System.out.print(" A" + node.getAction().getActionType().getActionNo() + "(" + node.getVisitCount() + "|" + (int)node.getValue() + ") ");
+            System.out.print("A" + node.getAction().getActionType().getActionNo() + "(" + node.getVisitCount() + "|" + (int)node.getValue() + ") ");
         }
-
         System.out.println();
+        TreeNode bestNode = rootNode.selectBestChild();
+        System.out.println(bestNode.getAction().getActionType() + " (" + bestNode.getVisitCount() + "|" + (int)bestNode.getValue() + ") ");
         System.out.println();
 
-        return action;
+        return bestNode.getAction();
 
     }
 
@@ -80,17 +78,15 @@ public class Agent {
 
     private double rollOut() {
         double value = 0;
-        for (int i = 0; i <= remainingStep; i ++) {
+        int depth = 0;
+        while (sim.getSteps() <= remainingStep) {
+            depth += 1;
             State previousState = sim.getCurrentState();
             List<Action> actions = generateActions(previousState);
             State currentState = sim.step(actions.get(random.nextInt(actions.size())));
-
             int bonus = sim.isGoalState(currentState)? 5 : 0;
-
-            double penalty = Math.log(sim.getSteps());
-
-            value += (currentState.getPos() + bonus - penalty) * Math.pow(Solver.DISCOUNT_FACTOR, i);
-
+            double penalty = Math.sqrt(sim.getSteps());
+            value += (currentState.getPos() + bonus - penalty) * Math.pow(Solver.DISCOUNT_FACTOR, depth);
         }
         return value;
     }
