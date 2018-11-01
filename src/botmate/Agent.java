@@ -86,8 +86,8 @@ public class Agent {
             State currentState = sim.step(actions.get(random.nextInt(actions.size())));
 
             int bonus = sim.isGoalState(currentState)? 5 : 0;
-
-            double penalty = sim.getSteps()/ps.getN();
+            
+            double penalty = Math.log(sim.getSteps());
 
             value += (currentState.getPos() + bonus - penalty) * Math.pow(Solver.DISCOUNT_FACTOR, i);
 
