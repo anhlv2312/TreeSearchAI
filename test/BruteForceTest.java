@@ -36,7 +36,7 @@ public class BruteForceTest {
         String inputFile = "test." + level + ".input.txt";
         String outputFile = "test." + level + ".output.txt";
 
-//        InputGenerator.generateInputFile(level, inputFile );
+        InputGenerator.generateInputFile(level, inputFile );
         ProblemSpec ps = new ProblemSpec(inputFile);
         Simulator sim = new Simulator(ps, outputFile);
 
