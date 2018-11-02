@@ -66,14 +66,14 @@ public class TreeNode {
     }
 
     public TreeNode selectPromisingChild() {
-        TreeNode selected = new TreeNode(null);
-        double bestValue = -Double.MAX_VALUE;
+        TreeNode selected = children.get(0);
+        double bestValue = children.get(0).getValue();
         for (TreeNode childNode : children) {
             if (childNode.visitCount == 0) {
                 return childNode;
             }
             double utcValue = childNode.value + Solver.EXPLORATION_CONSTANT * Math.sqrt(Math.log(this.visitCount) / (childNode.visitCount));
-            if (utcValue > bestValue) {
+            if (utcValue >= bestValue) {
                 selected = childNode;
                 bestValue = utcValue;
             }
@@ -82,15 +82,29 @@ public class TreeNode {
     }
 
     public TreeNode selectBestChild() {
-        TreeNode selected = new TreeNode(null);
-        double bestValue = -Double.MAX_VALUE;
+        TreeNode selected = children.get(0);
+        TreeNode moveNode = null;
+        double total = 0;
+        int count = 0;
+        double bestValue = children.get(0).getValue();
         for (TreeNode childNode : children) {
+            count += 1;
+            total += childNode.getValue();
+            if (childNode.getAction().getActionType().equals(ActionType.MOVE)) {
+                moveNode = childNode;
+            }
             if (childNode.getValue() > bestValue) {
                 selected = childNode;
                 bestValue = childNode.getValue();
             }
         }
-        return selected;
+
+        double averageValue = total/count;
+        if (moveNode != null && (bestValue/averageValue < Solver.MOVING_BIAS) && moveNode.getValue() > averageValue) {
+            return moveNode;
+        } else {
+            return selected;
+        }
     }
 
 }
