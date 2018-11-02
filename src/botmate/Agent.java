@@ -102,7 +102,12 @@ public class Agent {
             return actions;
         }
 
-        actions.add(new Action(ActionType.MOVE));
+        int currentTerrainIndex = ps.getTerrainIndex(ps.getEnvironmentMap()[currentState.getPos() - 1]);
+        int currentCarIndex = ps.getCarIndex(currentState.getCarType());
+
+        if (currentState.getFuel() >= ps.getFuelUsage()[currentTerrainIndex][currentCarIndex]) {
+            actions.add(new Action(ActionType.MOVE));
+        }
 
         if (ps.getLevel().isValidActionForLevel(ActionType.CHANGE_CAR) &&
                 !ps.getLevel().isValidActionForLevel(ActionType.CHANGE_CAR_AND_DRIVER)) {
