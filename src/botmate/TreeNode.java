@@ -65,14 +65,14 @@ public class TreeNode {
         }
     }
 
-    public TreeNode selectPromisingChild() {
+    public TreeNode selectPromisingChild(double constant) {
         TreeNode selected = children.get(0);
         double bestValue = children.get(0).getValue();
         for (TreeNode childNode : children) {
             if (childNode.visitCount == 0) {
                 return childNode;
             }
-            double utcValue = childNode.value + Solver.EXPLORATION_CONSTANT * Math.sqrt(Math.log(this.visitCount) / (childNode.visitCount));
+            double utcValue = childNode.value + constant * Math.sqrt(Math.log(this.visitCount) / (childNode.visitCount));
             if (utcValue >= bestValue) {
                 selected = childNode;
                 bestValue = utcValue;

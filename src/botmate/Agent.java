@@ -10,6 +10,7 @@ public class Agent {
     private ProblemSpec ps;
     private RollOutSimulator sim;
     private Random random;
+    int startPos;
     private int remainingStep;
     private List<TirePressure> tirePressures;
 
@@ -27,6 +28,7 @@ public class Agent {
 
         TreeNode rootNode = new TreeNode(null);
         this.remainingStep = remainingStep;
+        this.startPos = currentState.getPos();
         this.sim = new RollOutSimulator(ps, currentState);
 
         System.out.print(currentState);
@@ -42,11 +44,11 @@ public class Agent {
 
 
         for (TreeNode node : rootNode.getChildren()) {
-            System.out.print("A" + node.getAction().getActionType().getActionNo() + "(" + node.getVisitCount() + "|" + (int)node.getValue() + ") ");
+            System.out.print("A" + node.getAction().getActionType().getActionNo() + "(" + node.getVisitCount() + "|" + node.getValue() + ") ");
         }
         System.out.println();
         TreeNode bestNode = rootNode.selectBestChild();
-        System.out.println(bestNode.getAction().getActionType() + " (" + bestNode.getVisitCount() + "|" + (int)bestNode.getValue() + ") ");
+        System.out.println(bestNode.getAction().getActionType() + " (" + bestNode.getVisitCount() + "|" + bestNode.getValue() + ") ");
         System.out.println();
 
         return bestNode.getAction();
@@ -57,7 +59,7 @@ public class Agent {
         sim.reset();
         TreeNode currentNode = rootNode;
         while (!currentNode.isLeafNode()) {
-            currentNode = currentNode.selectPromisingChild();
+            currentNode = currentNode.selectPromisingChild(2*ProblemSpec.CAR_MAX_MOVE);
             sim.step(currentNode.getAction());
         }
         return currentNode;
@@ -77,22 +79,18 @@ public class Agent {
     }
 
     private double rollOut() {
-        double value = 0;
-        int depth = 0;
+        State currentState = sim.getCurrentState();
         while (sim.getSteps() <= remainingStep) {
-            depth += 1;
-            State previousState = sim.getCurrentState();
-            List<Action> actions = generateActions(previousState);
-            State currentState = sim.step(actions.get(random.nextInt(actions.size())));
-
-            int goalBonus = sim.isGoalState(currentState)? ProblemSpec.CAR_MAX_MOVE : 0;
-            double slipPenalty = currentState.isInSlipCondition()? ps.getSlipRecoveryTime() * currentState.getPos()/sim.getSteps() : 0;
-            double breakDownPenalty = currentState.isInBreakdownCondition()? ps.getRepairTime() * currentState.getPos()/sim.getSteps() : 0;
-            value += (currentState.getPos() + goalBonus - slipPenalty - breakDownPenalty) * Math.pow(Solver.DISCOUNT_FACTOR, depth);
+            currentState = sim.step(new Action(ActionType.MOVE));
+//            State previousState = sim.getCurrentState();
+//            List<Action> actions = generateActions(previousState);
+//            currentState = sim.step(actions.get(random.nextInt(actions.size())));
         }
-
-
-        return value;
+        if (sim.isGoalState(currentState)) {
+            return ProblemSpec.CAR_MAX_MOVE;
+        } else {
+            return currentState.getPos() - startPos;
+        }
     }
 
     private List<Action> generateActions(State currentState) {
@@ -110,8 +108,7 @@ public class Agent {
             actions.add(new Action(ActionType.MOVE));
         }
 
-        if (ps.getLevel().isValidActionForLevel(ActionType.CHANGE_CAR) &&
-                !ps.getLevel().isValidActionForLevel(ActionType.CHANGE_CAR_AND_DRIVER)) {
+        if (ps.getLevel().isValidActionForLevel(ActionType.CHANGE_CAR)){
             for (String car : ps.getCarOrder()) {
                 if (!car.equals(currentState.getCarType())) {
                     actions.add(new Action(ActionType.CHANGE_CAR, car));
@@ -119,8 +116,7 @@ public class Agent {
             }
         }
 
-        if (ps.getLevel().isValidActionForLevel(ActionType.CHANGE_DRIVER) &&
-                !ps.getLevel().isValidActionForLevel(ActionType.CHANGE_CAR_AND_DRIVER)) {
+        if (ps.getLevel().isValidActionForLevel(ActionType.CHANGE_DRIVER)) {
             for (String driver : ps.getDriverOrder()) {
                 if (!driver.equals(currentState.getDriver())) {
                     actions.add(new Action(ActionType.CHANGE_DRIVER, driver));
@@ -128,8 +124,7 @@ public class Agent {
             }
         }
 
-        if (ps.getLevel().isValidActionForLevel(ActionType.CHANGE_TIRES) &&
-                !ps.getLevel().isValidActionForLevel(ActionType.CHANGE_TIRE_FUEL_PRESSURE)) {
+        if (ps.getLevel().isValidActionForLevel(ActionType.CHANGE_TIRES)){
             for (Tire tire : ps.getTireOrder()) {
                 if (!tire.equals(currentState.getTireModel())) {
                     actions.add(new Action(ActionType.CHANGE_TIRES, tire));
@@ -137,15 +132,13 @@ public class Agent {
             }
         }
 
-        if (ps.getLevel().isValidActionForLevel(ActionType.ADD_FUEL) &&
-                !ps.getLevel().isValidActionForLevel(ActionType.CHANGE_TIRE_FUEL_PRESSURE)) {
+        if (ps.getLevel().isValidActionForLevel(ActionType.ADD_FUEL) ) {
             for (int i = 1; i < (50 - currentState.getFuel()) / 10; i++) {
                 actions.add(new Action(ActionType.ADD_FUEL, i * 10));
             }
         }
 
-        if (ps.getLevel().isValidActionForLevel(ActionType.CHANGE_PRESSURE) &&
-                !ps.getLevel().isValidActionForLevel(ActionType.CHANGE_TIRE_FUEL_PRESSURE)) {
+        if (ps.getLevel().isValidActionForLevel(ActionType.CHANGE_PRESSURE) ) {
             for (TirePressure tirePressure : tirePressures) {
                 if (!tirePressure.equals(currentState.getTirePressure())) {
                     actions.add(new Action(ActionType.CHANGE_PRESSURE, tirePressure));
@@ -153,28 +146,27 @@ public class Agent {
             }
         }
 
-        if (ps.getLevel().isValidActionForLevel(ActionType.CHANGE_CAR_AND_DRIVER)) {
-            for (String car : ps.getCarOrder()) {
-                for (String driver : ps.getDriverOrder()) {
-                    if (!car.equals(currentState.getCarType()) &&
-                            !driver.equals(currentState.getDriver())) {
-                        actions.add(new Action(ActionType.CHANGE_CAR_AND_DRIVER, car, driver));
-                    }
-                }
-            }
-        }
-
-        if (ps.getLevel().isValidActionForLevel(ActionType.CHANGE_TIRE_FUEL_PRESSURE)) {
-            for (Tire tire : ps.getTireOrder()) {
-                for (TirePressure tirePressure : tirePressures) {
-                    if (!tire.equals(currentState.getTireModel()) && !tirePressure.equals(currentState.getTirePressure())) {
-                        for (int i = 1; i < (50 - currentState.getFuel()) / 10; i++) {
-                            actions.add(new Action(ActionType.CHANGE_TIRE_FUEL_PRESSURE, tire, i * 10, tirePressure));
-                        }
-                    }
-                }
-            }
-        }
+//        if (ps.getLevel().isValidActionForLevel(ActionType.CHANGE_CAR_AND_DRIVER)) {
+//            for (String car : ps.getCarOrder()) {
+//                for (String driver : ps.getDriverOrder()) {
+//                    if (!(car.equals(currentState.getCarType()) && driver.equals(currentState.getDriver()))) {
+//                        actions.add(new Action(ActionType.CHANGE_CAR_AND_DRIVER, car, driver));
+//                    }
+//                }
+//            }
+//        }
+//
+//        if (ps.getLevel().isValidActionForLevel(ActionType.CHANGE_TIRE_FUEL_PRESSURE)) {
+//            for (Tire tire : ps.getTireOrder()) {
+//                for (TirePressure tirePressure : tirePressures) {
+//                    if (!(tire.equals(currentState.getTireModel()) && tirePressure.equals(currentState.getTirePressure()))) {
+//                        for (int i = 1; i < (50 - currentState.getFuel()) / 10; i++) {
+//                            actions.add(new Action(ActionType.CHANGE_TIRE_FUEL_PRESSURE, tire, i * 10, tirePressure));
+//                        }
+//                    }
+//                }
+//            }
+//        }
 
         return actions;
     }
