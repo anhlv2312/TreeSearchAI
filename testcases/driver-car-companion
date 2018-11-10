@@ -1,0 +1,29 @@
+4
+0.95 3 3
+30 32
+dirt-straight-hilly:1-6
+dirt-straight-flat:8-13
+dirt-slalom-hilly:15-20
+dirt-slalom-flat:22-29
+asphalt-straight-hilly:7
+asphalt-straight-flat:14
+asphalt-slalom-hilly:21
+asphalt-slalom-flat:30
+5
+car-the-worst:0 0 0 0 0.8 0 0 0 0 0 0.1 0.1
+car-the-wurst:0 0 0 0 0.8 0 0 0 0 0 0.1 0.1
+car-the-sanga:0 0 0 0 0.8 0 0 0 0 0 0.1 0.1
+car-breakdown:0 0 0 0 0 0.4 0 0 0 0 0.0 0.6
+car-slippery:0 0 0 0 0 0.4 0 0 0 0 0.6 0
+5
+driver-the-worst:0 0 0 0 0.8 0 0 0 0 0 0.1 0.1
+driver-the-wurst:0 0 0 0 0.8 0 0 0 0 0 0.1 0.1
+driver-the-sanga:0 0 0 0 0.8 0 0 0 0 0 0.1 0.1
+driver-breakdown:0 0 0 0 0 0.4 0 0 0 0 0.0 0.6
+driver-slippery:0 0 0 0 0 0.4 0 0 0 0 0.6 0
+all-terrain:0 0 0 0 0 0.8 0 0 0 0 0.1 0.1
+mud:0 0 0 0 0 0.8 0 0 0 0 0.1 0.1
+performance:0 0 0 0 0 0.8 0 0 0 0 0.1 0.1
+low-profile:0 0 0 0 0 0.8 0 0 0 0 0.1 0.1
+25 25 25 1 25  25 25 25 25 1  25 25 25 1 1  25 25 25 1 25  25 25 25 25 1  25 25 25 1 25  25 25 25 25 1  25 25 25 1 25
+0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1
