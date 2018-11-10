@@ -40,8 +40,8 @@ public class InputGenerator {
         //print gamma
         double gamma=0.8+((double)r.nextInt(20))/100;
         sb.append(df2.format(gamma));
-        int slipTime=2+r.nextInt(5);
-        int breakTime=4+r.nextInt(5);
+        int slipTime=2+r.nextInt(3);
+        int breakTime=4+r.nextInt(3);
         sb.append(" ");
         sb.append(slipTime);
         sb.append(" ");
