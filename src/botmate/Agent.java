@@ -79,7 +79,7 @@ public class Agent {
     private double rollOut() {
         double value = 0;
         int depth = 0;
-        while (sim.getSteps() <= ps.getMaxT()) {
+        while (sim.getSteps() <= remainingStep) {
             depth += 1;
             State previousState = sim.getCurrentState();
             List<Action> actions = generateActions(previousState);
@@ -89,8 +89,9 @@ public class Agent {
             double slipPenalty = currentState.isInSlipCondition()? ps.getSlipRecoveryTime() * currentState.getPos()/sim.getSteps() : 0;
             double breakDownPenalty = currentState.isInBreakdownCondition()? ps.getRepairTime() * currentState.getPos()/sim.getSteps() : 0;
             value += (currentState.getPos() + goalBonus - slipPenalty - breakDownPenalty) * Math.pow(Solver.DISCOUNT_FACTOR, depth);
-
         }
+
+
         return value;
     }
 
