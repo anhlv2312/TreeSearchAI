@@ -60,8 +60,10 @@ a terminal state is reached the simulator will output the results of the run to 
 
 ### Test Cases
 
+*10/11*: We have provided a new test for each level.
+
 *26/10*: We have provided some example inputs and generated output for each level so you have an idea of the input format and 
-can at least test your implementations are functionin correctly. We definitely encourage you to edit the examples to come up with
+can at least test your implementations are functioning correctly. We definitely encourage you to edit the examples to come up with
 your own input cases to test on. 
 
 ### Change log
