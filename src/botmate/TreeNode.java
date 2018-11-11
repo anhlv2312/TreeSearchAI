@@ -100,11 +100,15 @@ public class TreeNode {
         }
 
         double averageValue = total/count;
-        if (moveNode != null && (bestValue/averageValue < Solver.MOVING_BIAS) && moveNode.getValue() > averageValue) {
+        System.out.println("averageValue = " +  averageValue);
+        System.out.println("bestValue = " +  bestValue);
+        if (moveNode != null && ((bestValue/averageValue)< Solver.MOVING_BIAS) && moveNode.getValue() * Solver.MOVING_BIAS > bestValue) {
             return moveNode;
         } else {
             return selected;
         }
+
+
     }
 
 }

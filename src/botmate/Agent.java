@@ -9,14 +9,12 @@ public class Agent {
 
     private ProblemSpec ps;
     private RollOutSimulator sim;
-    private Random random;
-    int startPos;
+    private int startPos;
     private int remainingStep;
     private List<TirePressure> tirePressures;
 
     Agent(ProblemSpec ps) {
         this.ps = ps;
-        this.random = new Random();
         tirePressures = new ArrayList<>();
         tirePressures.add(TirePressure.ONE_HUNDRED_PERCENT);
         tirePressures.add(TirePressure.SEVENTY_FIVE_PERCENT);
@@ -42,13 +40,14 @@ public class Agent {
             backPropagation(nodeToExpand);
         }
 
-
         for (TreeNode node : rootNode.getChildren()) {
-            System.out.print("A" + node.getAction().getActionType().getActionNo() + "(" + node.getVisitCount() + "|" + node.getValue() + ") ");
+            System.out.print("A" + node.getAction().getActionType().getActionNo() + "(" + node.getVisitCount() + "|"
+                    + String.format( "%.2f", node.getValue()) + ") ");
         }
         System.out.println();
         TreeNode bestNode = rootNode.selectBestChild();
-        System.out.println(bestNode.getAction().getActionType() + " (" + bestNode.getVisitCount() + "|" + bestNode.getValue() + ") ");
+        System.out.println(bestNode.getAction().getActionType() + " (" + bestNode.getVisitCount() + "|"
+                + String.format( "%.2f", bestNode.getValue()) + ") ");
         System.out.println();
 
         return bestNode.getAction();
@@ -59,7 +58,7 @@ public class Agent {
         sim.reset();
         TreeNode currentNode = rootNode;
         while (!currentNode.isLeafNode()) {
-            currentNode = currentNode.selectPromisingChild(2*ProblemSpec.CAR_MAX_MOVE);
+            currentNode = currentNode.selectPromisingChild(Solver.EXPLORATION_CONSTANT);
             sim.step(currentNode.getAction());
         }
         return currentNode;
@@ -80,17 +79,21 @@ public class Agent {
 
     private double rollOut() {
         State currentState = sim.getCurrentState();
+        int currentCarIndex = ps.getCarIndex(currentState.getCarType());
         while (sim.getSteps() <= remainingStep) {
-            currentState = sim.step(new Action(ActionType.MOVE));
-//            State previousState = sim.getCurrentState();
-//            List<Action> actions = generateActions(previousState);
-//            currentState = sim.step(actions.get(random.nextInt(actions.size())));
+            int currentTerrainIndex = ps.getTerrainIndex(ps.getEnvironmentMap()[currentState.getPos() - 1]);
+            if (currentState.getFuel() >= ps.getFuelUsage()[currentTerrainIndex][currentCarIndex]) {
+                currentState = sim.step(new Action(ActionType.MOVE));
+            } else {
+                break;
+            }
+            if (sim.isGoalState(currentState)) {
+                return ps.getN() - startPos + ProblemSpec.CAR_MAX_MOVE;
+            }
+
         }
-        if (sim.isGoalState(currentState)) {
-            return ProblemSpec.CAR_MAX_MOVE;
-        } else {
-            return currentState.getPos() - startPos;
-        }
+        return currentState.getPos() - startPos;
+
     }
 
     private List<Action> generateActions(State currentState) {

@@ -33,10 +33,12 @@ public class BruteForceTest {
     }
 
     private boolean testLevel(int level) throws IOException {
-        String inputFile = "test." + level + ".input.txt";
+//        String inputFile = "test." + level + ".input.txt";
+//        InputGenerator.generateInputFile(level, inputFile );
+
+        String inputFile = "examples/level_" + level + "/input_lvl" + level + "_2.txt";
         String outputFile = "test." + level + ".output.txt";
 
-        InputGenerator.generateInputFile(level, inputFile );
         ProblemSpec ps = new ProblemSpec(inputFile);
         Simulator sim = new Simulator(ps, outputFile);
 

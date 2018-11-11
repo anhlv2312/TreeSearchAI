@@ -52,8 +52,8 @@ public class StatisticTest {
         Date date = new Date();
         long time = date.getTime();
 
-        String inputFile = "examples-2/level_" + level + "/input_lvl" + level + "_2.txt";
-        String outputFile = "examples-2/level_" + level + "/output_lvl" + level + "_2"+time+".txt";
+        String inputFile = "examples/level_" + level + "/input_lvl" + level + "_2.txt";
+        String outputFile = "examples/level_" + level + "/output_lvl" + level + "_2"+time+".txt";
 
 //        InputGenerator.generateInputFile(level, inputFile );
         ProblemSpec ps = new ProblemSpec(inputFile);
