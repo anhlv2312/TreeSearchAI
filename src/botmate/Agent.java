@@ -34,10 +34,13 @@ public class Agent {
         while (System.currentTimeMillis() - startTime < Solver.EXPLORATION_TIMEOUT) {
             TreeNode promisingNode = selectPromisingNode(rootNode);
             promisingNode.expand(generateActions(sim.getCurrentState()));
-            TreeNode nodeToExpand = promisingNode.getRandomChild();
-            sim.step(nodeToExpand.getAction());
-            nodeToExpand.setValue(rollOut());
-            backPropagation(nodeToExpand);
+
+            RollOutSimulator rollSim = new RollOutSimulator(ps, sim);
+            for (TreeNode nodeToRollOut : promisingNode.getChildren() ) {
+                double value = rollOut(rollSim, nodeToRollOut.getAction());
+                nodeToRollOut.setValue(value);
+                backPropagation(nodeToRollOut);
+            }
         }
 
         for (TreeNode node : rootNode.getChildren()) {
@@ -77,20 +80,23 @@ public class Agent {
         }
     }
 
-    private double rollOut() {
-        State currentState = sim.getCurrentState();
+    private double rollOut(RollOutSimulator rollSim, Action action) {
+        rollSim.reset();
+        rollSim.step(action);
+
+
+        State currentState = rollSim.getCurrentState();
         int currentCarIndex = ps.getCarIndex(currentState.getCarType());
-        while (sim.getSteps() <= remainingStep) {
+        while (rollSim.getSteps() <= remainingStep) {
             int currentTerrainIndex = ps.getTerrainIndex(ps.getEnvironmentMap()[currentState.getPos() - 1]);
             if (currentState.getFuel() >= ps.getFuelUsage()[currentTerrainIndex][currentCarIndex]) {
-                currentState = sim.step(new Action(ActionType.MOVE));
+                currentState = rollSim.step(new Action(ActionType.MOVE));
             } else {
                 break;
             }
-            if (sim.isGoalState(currentState)) {
+            if (rollSim.isGoalState(currentState)) {
                 return ps.getN() - startPos + ProblemSpec.CAR_MAX_MOVE;
             }
-
         }
         return currentState.getPos() - startPos;
 

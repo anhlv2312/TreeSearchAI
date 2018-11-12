@@ -8,17 +8,26 @@ public class RollOutSimulator {
     private ProblemSpec ps;
     private State rootState;
     private State currentState;
+    private int initialStep;
     private int steps;
 
     public RollOutSimulator(ProblemSpec ps, State rootState) {
         this.ps = ps;
         this.currentState = rootState;
         this.rootState = rootState;
+        this.initialStep = 0;
+    }
+
+    public RollOutSimulator(ProblemSpec ps, RollOutSimulator sim) {
+        this.ps = ps;
+        this.currentState = sim.getCurrentState();
+        this.rootState = currentState;
+        this.initialStep = sim.getSteps();
     }
 
     public void reset() {
         this.currentState = rootState;
-        steps = 0;
+        steps = initialStep;
     }
 
     public State getCurrentState() {
