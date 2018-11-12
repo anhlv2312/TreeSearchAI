@@ -43,14 +43,16 @@ public class Agent {
             }
         }
 
+        int totalVisit = 0;
         for (TreeNode node : rootNode.getChildren()) {
             System.out.print("A" + node.getAction().getActionType().getActionNo() + "(" + node.getVisitCount() + "|"
-                    + String.format( "%.2f", node.getValue()) + ") ");
+                    + String.format( "%.3f", node.getValue()) + ") ");
+            totalVisit += node.getVisitCount();
         }
         System.out.println();
         TreeNode bestNode = rootNode.selectBestChild();
-        System.out.println(bestNode.getAction().getActionType() + " (" + bestNode.getVisitCount() + "|"
-                + String.format( "%.2f", bestNode.getValue()) + ") ");
+        System.out.println(bestNode.getAction().getActionType() + " (" + bestNode.getVisitCount() + "/" + totalVisit +"|"
+                + String.format( "%.3f", bestNode.getValue()) + ") ");
         System.out.println();
 
         return bestNode.getAction();
@@ -141,8 +143,7 @@ public class Agent {
         }
 
         if (ps.getLevel().isValidActionForLevel(ActionType.ADD_FUEL)) {
-            actions.add(new Action(ActionType.ADD_FUEL, 50 - currentState.getFuel()));
-            for (int i = 1; i <= (50 - currentState.getFuel()) / 10; i++) {
+            for (int i = 0; i <= (50 - currentState.getFuel()) / 10; i++) {
                 actions.add(new Action(ActionType.ADD_FUEL, i * 10));
             }
         }
@@ -169,8 +170,7 @@ public class Agent {
             for (Tire tire : ps.getTireOrder()) {
                 for (TirePressure tirePressure : tirePressures) {
                     if (!(tire.equals(currentState.getTireModel()) && tirePressure.equals(currentState.getTirePressure()))) {
-                        actions.add(new Action(ActionType.CHANGE_TIRE_FUEL_PRESSURE, tire, 50 - currentState.getFuel(), tirePressure));
-                        for (int i = 1; i <= (50 - currentState.getFuel()) / 10; i++) {
+                        for (int i = 0; i <= (50 - currentState.getFuel()) / 10; i++) {
                             actions.add(new Action(ActionType.CHANGE_TIRE_FUEL_PRESSURE, tire, i * 10, tirePressure));
                         }
                     }
