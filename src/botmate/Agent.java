@@ -44,15 +44,21 @@ public class Agent {
         }
 
         int totalVisit = 0;
+        int nodeCount = 0;
         for (TreeNode node : rootNode.getChildren()) {
             System.out.print("A" + node.getAction().getActionType().getActionNo() + "(" + node.getVisitCount() + "|"
                     + String.format( "%.3f", node.getValue()) + ") ");
             totalVisit += node.getVisitCount();
+            nodeCount += 1;
         }
         System.out.println();
         TreeNode bestNode = rootNode.selectBestChild();
-        System.out.println(bestNode.getAction().getActionType() + " (" + bestNode.getVisitCount() + "/" + totalVisit +"|"
-                + String.format( "%.3f", bestNode.getValue()) + ") ");
+        System.out.println(bestNode.getAction().getActionType()
+                + " | Value: " + String.format( "%.3f", bestNode.getValue())
+                + " | Visit: " + bestNode.getVisitCount()
+                + " | Total: " + totalVisit
+                + " | Percentage: " + bestNode.getVisitCount()*100/totalVisit + "%"
+                + " | Nodes: " + nodeCount  + ") ");
         System.out.println();
 
         return bestNode.getAction();
