@@ -68,6 +68,10 @@ your own input cases to test on.
 
 ### Change log
 
+*12/11*: Fixed bug in simulator for A8 where extra time was not being added proportional to fuel added. This change only affects level 5.
+
+*10/11*: Added Test example inputs for each level
+
 *28/10*: Fixed incorrect format on line-16 for input_lvl1.txt (there were too many fuel cost values). Does not affect implementation or tests since the extra values were ignored. 
 
 *27/10*: Fixed bug with A7 in state class, where fuel and tyre pressure were not being reset with car change
