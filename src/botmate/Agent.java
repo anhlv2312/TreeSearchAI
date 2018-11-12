@@ -84,7 +84,6 @@ public class Agent {
         rollSim.reset();
         rollSim.step(action);
 
-
         State currentState = rollSim.getCurrentState();
         int currentCarIndex = ps.getCarIndex(currentState.getCarType());
         while (rollSim.getSteps() <= remainingStep) {
@@ -117,8 +116,7 @@ public class Agent {
             actions.add(new Action(ActionType.MOVE));
         }
 
-        if (ps.getLevel().isValidActionForLevel(ActionType.CHANGE_CAR)
-                && !ps.getLevel().isValidActionForLevel(ActionType.CHANGE_CAR_AND_DRIVER)) {
+        if (ps.getLevel().isValidActionForLevel(ActionType.CHANGE_CAR)) {
             for (String car : ps.getCarOrder()) {
                 if (!car.equals(currentState.getCarType())) {
                     actions.add(new Action(ActionType.CHANGE_CAR, car));
@@ -126,8 +124,7 @@ public class Agent {
             }
         }
 
-        if (ps.getLevel().isValidActionForLevel(ActionType.CHANGE_DRIVER)
-                && !ps.getLevel().isValidActionForLevel(ActionType.CHANGE_CAR_AND_DRIVER)) {
+        if (ps.getLevel().isValidActionForLevel(ActionType.CHANGE_DRIVER)) {
             for (String driver : ps.getDriverOrder()) {
                 if (!driver.equals(currentState.getDriver())) {
                     actions.add(new Action(ActionType.CHANGE_DRIVER, driver));
@@ -135,8 +132,7 @@ public class Agent {
             }
         }
 
-        if (ps.getLevel().isValidActionForLevel(ActionType.CHANGE_TIRES)
-                && !ps.getLevel().isValidActionForLevel(ActionType.CHANGE_TIRE_FUEL_PRESSURE)){
+        if (ps.getLevel().isValidActionForLevel(ActionType.CHANGE_TIRES)) {
             for (Tire tire : ps.getTireOrder()) {
                 if (!tire.equals(currentState.getTireModel())) {
                     actions.add(new Action(ActionType.CHANGE_TIRES, tire));
@@ -144,15 +140,13 @@ public class Agent {
             }
         }
 
-        if (ps.getLevel().isValidActionForLevel(ActionType.ADD_FUEL)
-                && !ps.getLevel().isValidActionForLevel(ActionType.CHANGE_TIRE_FUEL_PRESSURE)) {
+        if (ps.getLevel().isValidActionForLevel(ActionType.ADD_FUEL)) {
             for (int i = 1; i < (50 - currentState.getFuel()) / 10; i++) {
                 actions.add(new Action(ActionType.ADD_FUEL, i * 10));
             }
         }
 
-        if (ps.getLevel().isValidActionForLevel(ActionType.CHANGE_PRESSURE)
-                && !ps.getLevel().isValidActionForLevel(ActionType.CHANGE_TIRE_FUEL_PRESSURE)) {
+        if (ps.getLevel().isValidActionForLevel(ActionType.CHANGE_PRESSURE)) {
             for (TirePressure tirePressure : tirePressures) {
                 if (!tirePressure.equals(currentState.getTirePressure())) {
                     actions.add(new Action(ActionType.CHANGE_PRESSURE, tirePressure));

@@ -83,33 +83,14 @@ public class TreeNode {
 
     public TreeNode selectBestChild() {
         TreeNode selectedNode = children.get(0);
-        TreeNode moveNode = null;
-        ActionType selectedActionType = selectedNode.getAction().getActionType();
         double bestValue = children.get(0).getValue();
-        double total = 0;
-        int count = 0;
         for (TreeNode childNode : children) {
-            count += 1;
-            total += childNode.getValue();
-            if (childNode.getAction().getActionType().equals(ActionType.MOVE)) {
-                moveNode = childNode;
-            }
             if (childNode.getValue() > bestValue) {
                 selectedNode = childNode;
-                selectedActionType = childNode.getAction().getActionType();
                 bestValue = childNode.getValue();
             }
         }
-
-        double averageValue = total/count;
-        if (moveNode != null && !selectedActionType.equals(ActionType.MOVE)
-                && (bestValue/averageValue) < Solver.MOVING_BIAS && moveNode.getValue() * Solver.MOVING_BIAS > bestValue) {
-            return moveNode;
-        } else {
-            return selectedNode;
-        }
-
-
+        return selectedNode;
     }
 
 }
