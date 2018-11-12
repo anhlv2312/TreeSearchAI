@@ -87,9 +87,10 @@ public class Agent {
         State currentState = rollSim.getCurrentState();
         int currentCarIndex = ps.getCarIndex(currentState.getCarType());
         while (rollSim.getSteps() <= remainingStep) {
-            rollSim.step(new Action(ActionType.MOVE));
             int currentTerrainIndex = ps.getTerrainIndex(ps.getEnvironmentMap()[currentState.getPos() - 1]);
-            if (currentState.getFuel() < ps.getFuelUsage()[currentTerrainIndex][currentCarIndex]) {
+            if (currentState.getFuel() >= ps.getFuelUsage()[currentTerrainIndex][currentCarIndex]) {
+                rollSim.step(new Action(ActionType.MOVE));
+            } else {
                 break;
             }
             if (rollSim.isGoalState(currentState)) {
