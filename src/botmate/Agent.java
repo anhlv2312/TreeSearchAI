@@ -87,10 +87,9 @@ public class Agent {
         State currentState = rollSim.getCurrentState();
         int currentCarIndex = ps.getCarIndex(currentState.getCarType());
         while (rollSim.getSteps() <= remainingStep) {
+            rollSim.step(new Action(ActionType.MOVE));
             int currentTerrainIndex = ps.getTerrainIndex(ps.getEnvironmentMap()[currentState.getPos() - 1]);
-            if (currentState.getFuel() >= ps.getFuelUsage()[currentTerrainIndex][currentCarIndex]) {
-                currentState = rollSim.step(new Action(ActionType.MOVE));
-            } else {
+            if (currentState.getFuel() < ps.getFuelUsage()[currentTerrainIndex][currentCarIndex]) {
                 break;
             }
             if (rollSim.isGoalState(currentState)) {
@@ -141,8 +140,9 @@ public class Agent {
         }
 
         if (ps.getLevel().isValidActionForLevel(ActionType.ADD_FUEL)) {
-            for (int i = 0; i <= (50 - currentState.getFuel()) / 10; i++) {
-                actions.add(new Action(ActionType.ADD_FUEL, (i + 1) * 10));
+            actions.add(new Action(ActionType.ADD_FUEL, 50 - currentState.getFuel()));
+            for (int i = 1; i <= (50 - currentState.getFuel()) / 10; i++) {
+                actions.add(new Action(ActionType.ADD_FUEL, i * 10));
             }
         }
 
@@ -168,8 +168,9 @@ public class Agent {
             for (Tire tire : ps.getTireOrder()) {
                 for (TirePressure tirePressure : tirePressures) {
                     if (!(tire.equals(currentState.getTireModel()) && tirePressure.equals(currentState.getTirePressure()))) {
-                        for (int i = 0; i <= (50 - currentState.getFuel()) / 10; i++) {
-                            actions.add(new Action(ActionType.CHANGE_TIRE_FUEL_PRESSURE, tire, (i + 1) * 10, tirePressure));
+                        actions.add(new Action(ActionType.CHANGE_TIRE_FUEL_PRESSURE, tire, 50 - currentState.getFuel(), tirePressure));
+                        for (int i = 1; i <= (50 - currentState.getFuel()) / 10; i++) {
+                            actions.add(new Action(ActionType.CHANGE_TIRE_FUEL_PRESSURE, tire, i * 10, tirePressure));
                         }
                     }
                 }
