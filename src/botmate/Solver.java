@@ -7,9 +7,8 @@ import java.io.IOException;
 
 public class Solver {
 
-    public static final int EXPLORATION_TIMEOUT = 1000;
-    public static final int EXPLORATION_CONSTANT = 100;
-    public static final double MOVING_BIAS = 1.05;
+    public static final int EXPLORATION_TIMEOUT = 10000;
+    public static final int EXPLORATION_CONSTANT = EXPLORATION_TIMEOUT/100;
 
     public static void main(String[] args) {
 
