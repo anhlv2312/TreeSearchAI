@@ -1,29 +1,29 @@
 4
 0.95 3 3
-30 32
+30 90
 dirt-straight-hilly:1-6
-dirt-straight-flat:8-13
-dirt-slalom-hilly:15-20
-dirt-slalom-flat:22-29
-asphalt-straight-hilly:7
-asphalt-straight-flat:14
-asphalt-slalom-hilly:21
-asphalt-slalom-flat:30
+dirt-straight-flat:7-12
+dirt-slalom-hilly:13-18
+dirt-slalom-flat:19-24
+asphalt-straight-hilly:25
+asphalt-straight-flat:26
+asphalt-slalom-hilly:27
+asphalt-slalom-flat:28-30
 5
-car-the-worst:0 0 0 0 0.8 0 0 0 0 0 0.1 0.1
-car-the-wurst:0 0 0 0 0.8 0 0 0 0 0 0.1 0.1
-car-the-sanga:0 0 0 0 0.8 0 0 0 0 0 0.1 0.1
-car-breakdown:0 0 0 0 0 0.4 0 0 0 0 0.0 0.6
-car-slippery:0 0 0 0 0 0.4 0 0 0 0 0.6 0
+car-the-worst:0 0.05 0.05 0.1 0.2 0.25 0.15 0 0 0 0.1 0.1
+car-for-1-6:0 0.05 0.05 0.1 0.2 0.25 0.15 0 0 0 0.1 0.1
+car-for-7-12:0 0.05 0.05 0.1 0.2 0.25 0.15 0 0 0 0.1 0.1
+car-for-13-18:0 0.05 0.05 0.1 0.2 0.25 0.15 0 0 0 0.1 0.1
+car-for-19-24:0 0.05 0.05 0.1 0.2 0.25 0.15 0 0 0 0.1 0.1
 5
-driver-the-worst:0 0 0 0 0.8 0 0 0 0 0 0.1 0.1
-driver-the-wurst:0 0 0 0 0.8 0 0 0 0 0 0.1 0.1
-driver-the-sanga:0 0 0 0 0.8 0 0 0 0 0 0.1 0.1
-driver-breakdown:0 0 0 0 0 0.4 0 0 0 0 0.0 0.6
-driver-slippery:0 0 0 0 0 0.4 0 0 0 0 0.6 0
-all-terrain:0 0 0 0 0 0.8 0 0 0 0 0.1 0.1
-mud:0 0 0 0 0 0.8 0 0 0 0 0.1 0.1
-performance:0 0 0 0 0 0.8 0 0 0 0 0.1 0.1
-low-profile:0 0 0 0 0 0.8 0 0 0 0 0.1 0.1
-25 25 25 1 25  25 25 25 25 1  25 25 25 1 1  25 25 25 1 25  25 25 25 25 1  25 25 25 1 25  25 25 25 25 1  25 25 25 1 25
-0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1
+driver-worst:0.1 0.1 0.15 0.15 0.1 0.05 0 0.05 0.05 0 0.15 0.1
+driver-good:0.05 0.05 0.05 0.05 0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1
+driver-best:0 0 0.05 0.05 0.05 0.15 0.15 0.15 0.15 0.1 0.05 0.1
+driver-avg1:0.1 0.1 0.1 0.1 0.1 0.05 0.05 0.05 0.05 0.1 0.1 0.1
+driver-avg2:0.1 0.1 0.1 0.1 0.1 0.05 0.05 0.05 0.05 0.1 0.1 0.1
+all-terrain:0.1 0.15 0.15 0.15 0.1 0.05 0.05 0.05 0 0 0.1 0.1 (worst)
+mud:0.1 0.1 0.1 0.1 0.1 0.05 0.05 0.05 0.05 0.1 0.1 0.1 (average)
+low-profile:0.05 0.05 0.05 0.05 0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1 (good)
+performance:0 0 0.05 0.05 0.05 0.15 0.15 0.15 0.15 0.1 0.05 0.1 (best)
+15 2 15 15 15 15 15 2 15 15 15 15 15 2 15 15 15 15 15 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2
+0.15 0.15 0.15 0.15 0.15 0.15 0.15 0.15

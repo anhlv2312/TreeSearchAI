@@ -66,7 +66,7 @@ public class TreeNode {
     }
 
     public TreeNode selectPromisingChild(double constant) {
-        TreeNode selected = children.get(0);
+        TreeNode selectedNode = children.get(0);
         double bestValue = children.get(0).getValue();
         for (TreeNode childNode : children) {
             if (childNode.visitCount == 0) {
@@ -74,19 +74,20 @@ public class TreeNode {
             }
             double utcValue = childNode.value + constant * Math.sqrt(Math.log(this.visitCount) / (childNode.visitCount));
             if (utcValue >= bestValue) {
-                selected = childNode;
+                selectedNode = childNode;
                 bestValue = utcValue;
             }
         }
-        return selected;
+        return selectedNode;
     }
 
     public TreeNode selectBestChild() {
-        TreeNode selected = children.get(0);
+        TreeNode selectedNode = children.get(0);
         TreeNode moveNode = null;
+        ActionType selectedActionType = selectedNode.getAction().getActionType();
+        double bestValue = children.get(0).getValue();
         double total = 0;
         int count = 0;
-        double bestValue = children.get(0).getValue();
         for (TreeNode childNode : children) {
             count += 1;
             total += childNode.getValue();
@@ -94,16 +95,18 @@ public class TreeNode {
                 moveNode = childNode;
             }
             if (childNode.getValue() > bestValue) {
-                selected = childNode;
+                selectedNode = childNode;
+                selectedActionType = childNode.getAction().getActionType();
                 bestValue = childNode.getValue();
             }
         }
 
         double averageValue = total/count;
-        if (moveNode != null && ((bestValue/averageValue)< Solver.MOVING_BIAS) && moveNode.getValue() * Solver.MOVING_BIAS > bestValue) {
+        if (moveNode != null && !selectedActionType.equals(ActionType.MOVE)
+                && (bestValue/averageValue) < Solver.MOVING_BIAS && moveNode.getValue() * Solver.MOVING_BIAS > bestValue) {
             return moveNode;
         } else {
-            return selected;
+            return selectedNode;
         }
 
 
