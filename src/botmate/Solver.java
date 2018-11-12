@@ -7,7 +7,7 @@ import java.io.IOException;
 
 public class Solver {
 
-    public static final int EXPLORATION_TIMEOUT = 15000;
+    public static final int EXPLORATION_TIMEOUT = 5000;
     public static final int EXPLORATION_CONSTANT = EXPLORATION_TIMEOUT/100;
 
     public static void main(String[] args) {
