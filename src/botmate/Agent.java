@@ -107,13 +107,7 @@ public class Agent {
             }
             currentState = rollSim.step(new Action(ActionType.MOVE));
         }
-
-        if ((rollSim.getSteps() == remainingStep) && !rollSim.isGoalState(currentState)) {
-            return 0;
-        } else{
-            return currentState.getPos() - startPos;
-        }
-
+        return currentState.getPos() - startPos;
     }
 
     private List<Action> generateActions(State currentState) {
