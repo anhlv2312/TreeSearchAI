@@ -99,18 +99,17 @@ public class Agent {
         int currentCarIndex = ps.getCarIndex(currentState.getCarType());
         while (rollSim.getSteps() <= remainingStep) {
             int currentTerrainIndex = ps.getTerrainIndex(ps.getEnvironmentMap()[currentState.getPos() - 1]);
-            if (currentState.getFuel() >= ps.getFuelUsage()[currentTerrainIndex][currentCarIndex]) {
-                currentState = rollSim.step(new Action(ActionType.MOVE));
-            } else {
+            if (currentState.getFuel() < ps.getFuelUsage()[currentTerrainIndex][currentCarIndex]) {
                 break;
             }
             if (rollSim.isGoalState(currentState)) {
                 return ps.getN() - startPos + ProblemSpec.CAR_MAX_MOVE;
             }
+            currentState = rollSim.step(new Action(ActionType.MOVE));
         }
 
         if ((rollSim.getSteps() == remainingStep) && !rollSim.isGoalState(currentState)) {
-            return currentState.getPos() - startPos - ProblemSpec.CAR_MIN_MOVE;
+            return 0;
         } else{
             return currentState.getPos() - startPos;
         }
@@ -157,7 +156,7 @@ public class Agent {
         }
 
         if (ps.getLevel().isValidActionForLevel(ActionType.ADD_FUEL) && !ps.getLevel().isValidActionForLevel(ActionType.CHANGE_TIRE_FUEL_PRESSURE)) {
-            for (int i = 0; i <= (50 - currentState.getFuel()) / 10; i++) {
+            for (int i = 1; i <= (50 - currentState.getFuel()) / 10; i++) {
                 actions.add(new Action(ActionType.ADD_FUEL, i * 10));
             }
         }
