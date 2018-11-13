@@ -7,8 +7,8 @@ import java.io.IOException;
 
 public class Solver {
 
-    public static final int EXPLORATION_TIMEOUT = 1000;
-    public static final int EXPLORATION_CONSTANT = EXPLORATION_TIMEOUT/100;
+    public static final int EXPLORATION_TIMEOUT = 10000;
+    public static final int EXPLORATION_CONSTANT = EXPLORATION_TIMEOUT/150;
 
     public static void main(String[] args) {
 
@@ -31,6 +31,7 @@ public class Solver {
         int currentPos = currentState.getPos();
 
         while (!sim.isGoalState(currentState) && currentState != null) {
+            System.out.print("Step: " + sim.getSteps() + " - ");
             currentPos = currentState.getPos();
             Action action = agent.selectBestAction(currentState, ps.getMaxT()-sim.getSteps());
             currentState = sim.step(action);

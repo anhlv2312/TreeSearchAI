@@ -60,8 +60,9 @@ public class Agent {
                 + " | Average: " + String.format( "%.3f", totalValue/nodeCount)
                 + " | Visit: " + bestNode.getVisitCount()
                 + " | Total: " + totalVisit
-                + " | Percentage: " + bestNode.getVisitCount()*100/totalVisit + "%"
-                + " | Nodes: " + nodeCount  + ") ");
+                + " | Nodes: " + nodeCount
+                + " | Percentage: " + bestNode.getVisitCount()*100/totalVisit + "%");
+
         System.out.println();
 
         return bestNode.getAction();
