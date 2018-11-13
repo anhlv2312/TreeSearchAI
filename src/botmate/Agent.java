@@ -108,7 +108,12 @@ public class Agent {
                 return ps.getN() - startPos + ProblemSpec.CAR_MAX_MOVE;
             }
         }
-        return currentState.getPos() - startPos;
+
+        if ((rollSim.getSteps() == remainingStep) && !rollSim.isGoalState(currentState)) {
+            return ProblemSpec.CAR_MIN_MOVE;
+        } else{
+            return currentState.getPos() - startPos;
+        }
 
     }
 
