@@ -28,7 +28,10 @@ public class Solver {
         Agent agent = new Agent(ps);
         State currentState = sim.reset();
 
+        int currentPos = currentState.getPos();
+
         while (!sim.isGoalState(currentState) && currentState != null) {
+            currentPos = currentState.getPos();
             Action action = agent.selectBestAction(currentState, ps.getMaxT()-sim.getSteps());
             currentState = sim.step(action);
         }
@@ -40,7 +43,7 @@ public class Solver {
             return true;
         }
 
-        System.out.println("Failed!" );
+        System.out.println("Failed at position " + currentPos + "/" + ps.getN() );
         return false;
 
     }
